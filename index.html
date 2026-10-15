@@ -1281,6 +1281,7 @@
     let partnersData = JSON.parse(JSON.stringify(defaultPartners));
     let projectsData = JSON.parse(JSON.stringify(defaultProjects));
     let supabaseClient = null;
+    let localSupabaseMigration = null;
     let tempUploadedProjectImg = null;
     let tempUploadedPartnerLogo = null;
 
@@ -1293,6 +1294,7 @@
         if (sSet) { siteSettings = { ...defaultSiteSettings, ...JSON.parse(sSet) }; delete siteSettings.adminPass; delete siteSettings.adminUser; }
         if (sPart) partnersData = JSON.parse(sPart);
         if (sProj) projectsData = JSON.parse(sProj);
+        if (sSet || sPart || sProj) localSupabaseMigration = { settings: sSet ? { ...siteSettings } : null, partners: sPart ? [...partnersData] : null, projects: sProj ? [...projectsData] : null };
       } catch (e) {}
       applyThemeToDocument();
     }
@@ -2084,8 +2086,13 @@ Return ONLY a valid JSON object with keys:
     async function deletePartnerItem(partnerId) {
       partnersData = partnersData.filter(p => p.id !== partnerId);
       saveStoredData();
+      let cloudError = null;
+      if (supabaseClient && isAdminLoggedIn) {
+        const result = await supabaseClient.from('portfolio_partners').delete().eq('id', partnerId);
+        cloudError = result.error;
+      }
       renderAll();
-      showToast('تم حذف الشركة');
+      showToast(cloudError ? 'حُذفت محلياً فقط: ' + cloudError.message : 'تم حذف الشركة');
     }
 
     // Project Save / Edit / Delete
@@ -2221,11 +2228,16 @@ Return ONLY a valid JSON object with keys:
       showToast(`تم تغيير المقاس إلى ${p.aspect}`);
     }
 
-    function deleteProjectItem(projId) {
+    async function deleteProjectItem(projId) {
       projectsData = projectsData.filter(p => p.id !== projId);
       saveStoredData();
+      let cloudError = null;
+      if (supabaseClient && isAdminLoggedIn) {
+        const result = await supabaseClient.from('portfolio_projects').delete().eq('id', projId);
+        cloudError = result.error;
+      }
       renderAll();
-      showToast('تم حذف المشروع');
+      showToast(cloudError ? 'حُذف محلياً فقط: ' + cloudError.message : 'تم حذف المشروع');
     }
 
     function renderAdminPanelLists() {
@@ -2455,9 +2467,14 @@ Return ONLY a valid JSON object with keys:
         const failure = results.find(result => result.error);
         if (failure) throw failure.error;
         const [projs, parts, settings] = results.map(result => result.data || []);
-        if (projs.length) projectsData = projs.map(row => row.payload);
-        if (parts.length) partnersData = parts.map(row => row.payload);
-        if (settings.length) siteSettings = { ...defaultSiteSettings, ...settings[0].payload };
+        const mergeById = (remoteRows, localRows) => {
+          const merged = new Map(remoteRows.map(item => [item.id, item]));
+          for (const item of localRows || []) if (!merged.has(item.id)) merged.set(item.id, item);
+          return [...merged.values()];
+        };
+        if (projs.length) projectsData = mergeById(projs.map(row => row.payload), localSupabaseMigration?.projects);
+        if (parts.length) partnersData = mergeById(parts.map(row => row.payload), localSupabaseMigration?.partners);
+        if (settings.length) siteSettings = { ...defaultSiteSettings, ...(localSupabaseMigration?.settings || {}), ...settings[0].payload };
         delete siteSettings.adminPass;
         delete siteSettings.adminUser;
         if (badge) {
