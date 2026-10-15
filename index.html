@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.47.10/dist/umd/supabase.min.js"></script>
+  <script>window.PORTFOLIO_SUPABASE_CONFIG = { url: "__SUPABASE_URL__", key: "__SUPABASE_PUBLISHABLE_KEY__" };</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,500;0,600;0,700;0,800;1,600;1,700&display=swap" rel="stylesheet">
@@ -538,12 +539,12 @@
         <div class="space-y-3">
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">اسم المستخدم أو الإيميل</label>
-            <input id="adminLoginUser" type="text" value="abdelmoneim" class="w-full bg-flatBg border border-flatBorder rounded-xl px-3.5 py-2.5 text-xs text-white" dir="ltr" />
+            <input id="adminLoginUser" type="email" placeholder="بريد حساب المالك المصرح به" autocomplete="username" class="w-full bg-flatBg border border-flatBorder rounded-xl px-3.5 py-2.5 text-xs text-white" dir="ltr" />
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">كلمة المرور (Password)</label>
             <input id="adminLoginPass" type="password" placeholder="أدخل كلمة المرور..." onkeydown="if(event.key==='Enter') handleAdminLogin()" class="w-full bg-flatBg border border-flatBorder rounded-xl px-3.5 py-2.5 text-xs text-white" dir="ltr" />
-            <p class="text-[11px] text-slate-400 mt-1">الافتراضي: <code class="text-brandAccent font-en">admin2026</code></p>
+            
           </div>
           <p id="adminLoginError" class="hidden text-xs text-red-400 font-semibold"></p>
           <button type="button" onclick="handleAdminLogin()" class="w-full flat-btn-primary py-2.5 rounded-xl text-xs sm:text-sm font-bold">
@@ -964,10 +965,6 @@
               <input id="setWhatsappUrl" type="url" class="w-full bg-flatBg border border-flatBorder rounded-xl px-3.5 py-2 text-xs text-white font-en" dir="ltr" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1">كلمة سر لوحة التحكم</label>
-              <input id="setAdminPass" type="text" class="w-full bg-flatBg border border-flatBorder rounded-xl px-3.5 py-2 text-xs text-brandAccent font-en" dir="ltr" />
-            </div>
-            <div>
               <label class="block text-xs font-semibold text-slate-300 mb-1">نص الزرار الرئيسي في الهوم بيج</label>
               <input id="setCtaExplore" type="text" class="w-full bg-flatBg border border-flatBorder rounded-xl px-3.5 py-2 text-xs text-white" />
             </div>
@@ -1014,15 +1011,7 @@
             <button type="button" onclick="copySupabaseSQL()" class="flat-btn-secondary px-4 py-2 rounded-xl text-xs font-bold">نسخ كود الجداول SQL</button>
           </div>
 
-          <pre id="supabaseSqlCode" class="bg-flatBg border border-flatBorder rounded-xl p-4 text-[11px] text-blue-200 overflow-x-auto font-mono" dir="ltr">CREATE TABLE IF NOT EXISTS portfolio_partners (id TEXT PRIMARY KEY, payload JSONB NOT NULL, updated_at TIMESTAMPTZ DEFAULT NOW());
-CREATE TABLE IF NOT EXISTS portfolio_projects (id TEXT PRIMARY KEY, payload JSONB NOT NULL, updated_at TIMESTAMPTZ DEFAULT NOW());
-CREATE TABLE IF NOT EXISTS portfolio_settings (id TEXT PRIMARY KEY, payload JSONB NOT NULL, updated_at TIMESTAMPTZ DEFAULT NOW());
-ALTER TABLE portfolio_partners ENABLE ROW LEVEL SECURITY;
-ALTER TABLE portfolio_projects ENABLE ROW LEVEL SECURITY;
-ALTER TABLE portfolio_settings ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Public All Partners" ON portfolio_partners FOR ALL USING (true);
-CREATE POLICY "Public All Projects" ON portfolio_projects FOR ALL USING (true);
-CREATE POLICY "Public All Settings" ON portfolio_settings FOR ALL USING (true);</pre>
+          <p id="supabaseSqlCode" class="bg-flatBg border border-flatBorder rounded-xl p-4 text-xs text-slate-300">شغّل ملف supabase-schema.sql في SQL Editor مرة واحدة. سياسات RLS تقصر الكتابة على حساب المالك.</p>
         </div>
 
       </div>
@@ -1133,7 +1122,6 @@ CREATE POLICY "Public All Settings" ON portfolio_settings FOR ALL USING (true);<
       phone: '01150741729',
       email: 'abdelmoneimashrafdiab@gmail.com',
       whatsappUrl: 'https://wa.me/message/2XHBZLZQRZ42O1',
-      adminPass: 'admin2026',
       themePrimary: '#1E6BFF',
       themeAccent: '#FACC15',
       themeBg: '#0E131B',
@@ -1302,7 +1290,7 @@ CREATE POLICY "Public All Settings" ON portfolio_settings FOR ALL USING (true);<
         const sSet = localStorage.getItem('ad_v3_settings');
         const sPart = localStorage.getItem('ad_v3_partners');
         const sProj = localStorage.getItem('ad_v3_projects');
-        if (sSet) siteSettings = { ...defaultSiteSettings, ...JSON.parse(sSet) };
+        if (sSet) { siteSettings = { ...defaultSiteSettings, ...JSON.parse(sSet) }; delete siteSettings.adminPass; delete siteSettings.adminUser; }
         if (sPart) partnersData = JSON.parse(sPart);
         if (sProj) projectsData = JSON.parse(sProj);
       } catch (e) {}
@@ -1916,7 +1904,6 @@ Return ONLY a valid JSON object with keys:
       document.getElementById('setPhone').value = siteSettings.phone || '';
       document.getElementById('setEmail').value = siteSettings.email || '';
       document.getElementById('setWhatsappUrl').value = siteSettings.whatsappUrl || '';
-      document.getElementById('setAdminPass').value = siteSettings.adminPass || 'admin2026';
       document.getElementById('setCtaExplore').value = siteSettings.ctaExploreAr || '';
       document.getElementById('setCtaWhatsapp').value = siteSettings.ctaWhatsappAr || '';
     }
@@ -1997,7 +1984,6 @@ Return ONLY a valid JSON object with keys:
       siteSettings.phone = document.getElementById('setPhone').value.trim();
       siteSettings.email = document.getElementById('setEmail').value.trim();
       siteSettings.whatsappUrl = document.getElementById('setWhatsappUrl').value.trim();
-      siteSettings.adminPass = document.getElementById('setAdminPass').value.trim() || 'admin2026';
       siteSettings.ctaExploreAr = document.getElementById('setCtaExplore').value.trim();
       siteSettings.ctaWhatsappAr = document.getElementById('setCtaWhatsapp').value.trim();
       syncAllToSupabase();
@@ -2407,55 +2393,90 @@ Return ONLY a valid JSON object with keys:
       }, 600);
     }
 
-    function handleAdminLogin() {
-      const pass = document.getElementById('adminLoginPass').value.trim();
-      if (pass === (siteSettings.adminPass || 'admin2026')) {
-        document.getElementById('adminLoginGate').classList.add('hidden');
-        document.getElementById('adminDashboardContent').classList.remove('hidden');
-        document.getElementById('adminLoginError').classList.add('hidden');
-        renderAdminPanelLists();
-        populateAdminSettingsInputs();
-        showToast('أهلاً بك يا منعم في لوحة التحكم الكاملة!');
-      } else {
-        const err = document.getElementById('adminLoginError');
-        err.textContent = 'كلمة المرور غير صحيحة (الافتراضية: admin2026)';
+    async function handleAdminLogin() {
+      const user = document.getElementById('adminLoginUser').value.trim().toLowerCase();
+      const pass = document.getElementById('adminLoginPass').value;
+      const err = document.getElementById('adminLoginError');
+      if (!supabaseClient || !user || !pass) {
+        err.textContent = 'اتصال Supabase غير جاهز أو بيانات الدخول غير مكتملة.';
+        err.classList.remove('hidden');
+        return;
+      }
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email: user, password: pass });
+        if (error || data.user?.email?.toLowerCase() !== portfolioOwnerEmail) throw error || new Error('Unauthorized');
+        unlockAdminDashboard();
+      } catch (e) {
+        err.textContent = 'تعذر تسجيل الدخول. استخدم حساب المالك المصرح به في Supabase Auth.';
         err.classList.remove('hidden');
       }
     }
 
-    function handleAdminLogout() {
+    function unlockAdminDashboard() {
+      isAdminLoggedIn = true;
+      document.getElementById('adminLoginGate').classList.add('hidden');
+      document.getElementById('adminDashboardContent').classList.remove('hidden');
+      document.getElementById('adminLoginError').classList.add('hidden');
+      renderAdminPanelLists();
+      populateAdminSettingsInputs();
+      showToast('أهلاً بك في لوحة التحكم الخاصة.');
+    }
+
+    async function handleAdminLogout() {
+      isAdminLoggedIn = false;
+      if (supabaseClient) await supabaseClient.auth.signOut();
       document.getElementById('adminLoginGate').classList.remove('hidden');
       document.getElementById('adminDashboardContent').classList.add('hidden');
       window.location.hash = '';
       navigateView('home');
     }
 
+    const portfolioOwnerEmail = 'abdelmoneimashrafdiab@gmail.com';
+    let isAdminLoggedIn = false;
+
     async function initSupabaseConnection() {
+      const built = window.PORTFOLIO_SUPABASE_CONFIG || {};
+      const sbUrl = built.url && !built.url.startsWith('__') ? built.url : (localStorage.getItem('ad_supabase_url') || '');
+      const sbKey = built.key && !built.key.startsWith('__') ? built.key : (localStorage.getItem('ad_supabase_key') || '');
+      if (document.getElementById('sbUrlInput')) document.getElementById('sbUrlInput').value = sbUrl;
+      if (document.getElementById('sbKeyInput')) document.getElementById('sbKeyInput').value = sbKey;
+      const badge = document.getElementById('supabaseStatusBadge');
+      if (!sbUrl || !sbKey || !window.supabase) {
+        if (badge) badge.textContent = 'قاعدة البيانات غير مهيأة';
+        return false;
+      }
       try {
-        const sbUrl = localStorage.getItem('ad_supabase_url') || '';
-        const sbKey = localStorage.getItem('ad_supabase_key') || '';
-        if (document.getElementById('sbUrlInput')) document.getElementById('sbUrlInput').value = sbUrl;
-        if (document.getElementById('sbKeyInput')) document.getElementById('sbKeyInput').value = sbKey;
-
-        if (sbUrl && sbKey && window.supabase) {
-          supabaseClient = window.supabase.createClient(sbUrl, sbKey);
-          const { data: rProjs, error } = await supabaseClient.from('portfolio_projects').select('*');
-          const { data: rParts } = await supabaseClient.from('portfolio_partners').select('*');
-          const { data: rSets } = await supabaseClient.from('portfolio_settings').select('*');
-
-          if (!error) {
-            if (rProjs && rProjs.length > 0) projectsData = rProjs.map(r => r.payload);
-            if (rParts && rParts.length > 0) partnersData = rParts.map(r => r.payload);
-            if (rSets && rSets.length > 0) siteSettings = { ...defaultSiteSettings, ...rSets[0].payload };
-            const badge = document.getElementById('supabaseStatusBadge');
-            if (badge) {
-              badge.textContent = 'متصل بـ Supabase 🟢';
-              badge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-500/40';
-            }
-            renderAll();
-          }
+        supabaseClient = window.supabase.createClient(sbUrl, sbKey);
+        const results = await Promise.all([
+          supabaseClient.from('portfolio_projects').select('*'),
+          supabaseClient.from('portfolio_partners').select('*'),
+          supabaseClient.from('portfolio_settings').select('*')
+        ]);
+        const failure = results.find(result => result.error);
+        if (failure) throw failure.error;
+        const [projs, parts, settings] = results.map(result => result.data || []);
+        if (projs.length) projectsData = projs.map(row => row.payload);
+        if (parts.length) partnersData = parts.map(row => row.payload);
+        if (settings.length) siteSettings = { ...defaultSiteSettings, ...settings[0].payload };
+        delete siteSettings.adminPass;
+        delete siteSettings.adminUser;
+        if (badge) {
+          badge.textContent = 'متصل بـ Supabase 🟢';
+          badge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-500/40';
         }
-      } catch (e) {}
+        renderAll();
+        const { data: sessionData } = await supabaseClient.auth.getSession();
+        if (sessionData.session?.user?.email?.toLowerCase() === portfolioOwnerEmail &&
+            (window.location.hash === '#admin' || new URLSearchParams(window.location.search).get('admin') === '1')) unlockAdminDashboard();
+        return true;
+      } catch (e) {
+        console.error('Supabase connection failed:', e);
+        if (badge) {
+          badge.textContent = 'تعذر تحميل بيانات Supabase';
+          badge.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-red-950 text-red-300 border border-red-500/40';
+        }
+        return false;
+      }
     }
 
     async function saveSupabaseCredentials() {
@@ -2470,40 +2491,36 @@ Return ONLY a valid JSON object with keys:
 
     async function testSupabaseConnection() {
       const box = document.getElementById('supabaseTestResultBox');
-      const sbUrl = document.getElementById('sbUrlInput').value.trim();
-      const sbKey = document.getElementById('sbKeyInput').value.trim();
-      if (!sbUrl || !sbKey) {
-        box.textContent = '⚠️ يرجى إدخال Project URL و Anon Key أولاً.';
-        return;
-      }
-      try {
-        supabaseClient = window.supabase.createClient(sbUrl, sbKey);
-        const { error } = await supabaseClient.from('portfolio_projects').select('id').limit(1);
-        if (error) {
-          box.textContent = `❌ تم الاتصال بـ Supabase ولكن يرجى تشغيل كود SQL بالأسفل في SQL Editor أولاً (${error.message}).`;
-        } else {
-          box.textContent = '✅ متصل بقاعدة بيانات Supabase بنجاح! جاري مزامنة جميع البيانات...';
-          await syncAllToSupabase();
-          await initSupabaseConnection();
-        }
-      } catch (e) {
-        box.textContent = '❌ تأكد من صحة رابط ومفتاح Supabase.';
-      }
+      const connected = await initSupabaseConnection();
+      box.textContent = connected ? '✅ الاتصال والجداول تعمل. بيانات الموقع تُقرأ من Supabase.' : '❌ تعذر الاتصال أو قراءة الجداول. راجع إعدادات Supabase وRLS.';
     }
 
     async function syncAllToSupabase() {
       saveStoredData();
       if (!supabaseClient) {
-        showToast('تم حفظ جميع التعديلات فوراً!');
+        showToast('تم الحفظ على هذا الجهاز فقط؛ قاعدة البيانات غير متصلة.');
         return;
       }
       try {
-        await supabaseClient.from('portfolio_settings').upsert({ id: 'main_settings', payload: siteSettings });
-        for (const p of partnersData) await supabaseClient.from('portfolio_partners').upsert({ id: p.id, payload: p });
-        for (const pr of projectsData) await supabaseClient.from('portfolio_projects').upsert({ id: pr.id, payload: pr });
+        const { data, error: authError } = await supabaseClient.auth.getUser();
+        if (authError || data.user?.email?.toLowerCase() !== portfolioOwnerEmail) throw new Error('سجّل الدخول بحساب المالك المصرح به قبل الحفظ السحابي.');
+        const safeSettings = { ...siteSettings };
+        delete safeSettings.adminPass;
+        delete safeSettings.adminUser;
+        const settingsWrite = await supabaseClient.from('portfolio_settings').upsert({ id: 'main_settings', payload: safeSettings, updated_at: new Date().toISOString() });
+        if (settingsWrite.error) throw settingsWrite.error;
+        for (const partner of partnersData) {
+          const result = await supabaseClient.from('portfolio_partners').upsert({ id: partner.id, payload: partner, updated_at: new Date().toISOString() });
+          if (result.error) throw result.error;
+        }
+        for (const project of projectsData) {
+          const result = await supabaseClient.from('portfolio_projects').upsert({ id: project.id, payload: project, updated_at: new Date().toISOString() });
+          if (result.error) throw result.error;
+        }
         showToast('تم حفظ ومزامنة التعديلات مع Supabase بنجاح!');
       } catch (e) {
-        showToast('تم حفظ التعديلات محلياً');
+        console.error('Supabase save failed:', e);
+        showToast(e.message || 'تعذر حفظ التغييرات في Supabase.');
       }
     }
 
