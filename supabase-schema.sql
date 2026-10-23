@@ -23,9 +23,10 @@ ALTER TABLE portfolio_partners ENABLE ROW LEVEL SECURITY;
 ALTER TABLE portfolio_projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE portfolio_settings ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Public Read Partners" ON portfolio_partners FOR SELECT USING (true);
-CREATE POLICY "Public Write Partners" ON portfolio_partners FOR ALL USING (true);
-CREATE POLICY "Public Read Projects" ON portfolio_projects FOR SELECT USING (true);
-CREATE POLICY "Public Write Projects" ON portfolio_projects FOR ALL USING (true);
-CREATE POLICY "Public Read Settings" ON portfolio_settings FOR SELECT USING (true);
-CREATE POLICY "Public Write Settings" ON portfolio_settings FOR ALL USING (true);
+DROP POLICY IF EXISTS "Public All Partners" ON portfolio_partners;
+DROP POLICY IF EXISTS "Public All Projects" ON portfolio_projects;
+DROP POLICY IF EXISTS "Public All Settings" ON portfolio_settings;
+
+CREATE POLICY "Public All Partners" ON portfolio_partners FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public All Projects" ON portfolio_projects FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public All Settings" ON portfolio_settings FOR ALL USING (true) WITH CHECK (true);
