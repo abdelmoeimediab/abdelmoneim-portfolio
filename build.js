@@ -14,14 +14,15 @@ if (url || key) {
     console.error('SUPABASE_URL / SUPABASE_ANON_KEY look invalid; refusing to build.');
     process.exit(1);
   }
-  const before = html;
-  html = html
-    .replace(/const DEFAULT_SUPABASE_URL = '[^']*';/, () => `const DEFAULT_SUPABASE_URL = '${url}';`)
-    .replace(/const DEFAULT_SUPABASE_KEY = '[^']*';/, () => `const DEFAULT_SUPABASE_KEY = '${key}';`);
-  if (html === before) {
+  const urlRe = /const DEFAULT_SUPABASE_URL = '[^']*';/;
+  const keyRe = /const DEFAULT_SUPABASE_KEY = '[^']*';/;
+  if (!urlRe.test(html) || !keyRe.test(html)) {
     console.error('Could not find the Supabase constants in index.html.');
     process.exit(1);
   }
+  html = html
+    .replace(urlRe, () => `const DEFAULT_SUPABASE_URL = '${url}';`)
+    .replace(keyRe, () => `const DEFAULT_SUPABASE_KEY = '${key}';`);
   console.log('Injected Supabase connection from environment variables.');
 } else {
   console.log('No Supabase env vars set; using defaults from index.html.');
