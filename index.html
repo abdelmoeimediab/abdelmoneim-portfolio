@@ -620,13 +620,12 @@
 
         <div class="space-y-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">اسم المستخدم أو الإيميل</label>
-            <input id="adminLoginUser" type="text" value="abdelmoneim" class="w-full bg-flatBg border border-flatBorder rounded-xl px-3.5 py-2.5 text-xs text-white" dir="ltr" />
+            <label class="block text-xs font-semibold text-slate-300 mb-1">الإيميل (Email)</label>
+            <input id="adminLoginUser" type="email" autocomplete="username" placeholder="you@example.com" class="w-full bg-flatBg border border-flatBorder rounded-xl px-3.5 py-2.5 text-xs text-white" dir="ltr" />
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-300 mb-1">كلمة المرور (Password)</label>
-            <input id="adminLoginPass" type="password" placeholder="أدخل كلمة المرور..." onkeydown="if(event.key==='Enter') handleAdminLogin()" class="w-full bg-flatBg border border-flatBorder rounded-xl px-3.5 py-2.5 text-xs text-white" dir="ltr" />
-            <p class="text-[11px] text-slate-400 mt-1">الافتراضي: <code class="text-brandAccent font-en">admin2026</code></p>
+            <input id="adminLoginPass" type="password" autocomplete="current-password" placeholder="أدخل كلمة المرور..." onkeydown="if(event.key==='Enter') handleAdminLogin()" class="w-full bg-flatBg border border-flatBorder rounded-xl px-3.5 py-2.5 text-xs text-white" dir="ltr" />
           </div>
           <p id="adminLoginError" class="hidden text-xs text-red-400 font-semibold"></p>
           <button type="button" onclick="handleAdminLogin()" class="w-full flat-btn-primary py-2.5 rounded-xl text-xs sm:text-sm font-bold">
@@ -1102,10 +1101,6 @@
               <input id="setWhatsappUrl" type="url" class="w-full bg-flatBg border border-flatBorder rounded-xl px-3.5 py-2 text-xs text-white font-en" dir="ltr" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1">كلمة سر لوحة التحكم</label>
-              <input id="setAdminPass" type="text" class="w-full bg-flatBg border border-flatBorder rounded-xl px-3.5 py-2 text-xs text-brandAccent font-en" dir="ltr" />
-            </div>
-            <div>
               <label class="block text-xs font-semibold text-slate-300 mb-1">نص الزرار الرئيسي في الهوم بيج</label>
               <input id="setCtaExplore" type="text" class="w-full bg-flatBg border border-flatBorder rounded-xl px-3.5 py-2 text-xs text-white" />
             </div>
@@ -1179,18 +1174,7 @@
             <button type="button" onclick="copySupabaseSQL()" class="flat-btn-secondary px-4 py-2 rounded-xl text-xs font-bold">نسخ كود الجداول SQL</button>
           </div>
 
-          <pre id="supabaseSqlCode" class="bg-flatBg border border-flatBorder rounded-xl p-4 text-[11px] text-blue-200 overflow-x-auto font-mono" dir="ltr">CREATE TABLE IF NOT EXISTS portfolio_partners (id TEXT PRIMARY KEY, payload JSONB NOT NULL, updated_at TIMESTAMPTZ DEFAULT NOW());
-CREATE TABLE IF NOT EXISTS portfolio_projects (id TEXT PRIMARY KEY, payload JSONB NOT NULL, updated_at TIMESTAMPTZ DEFAULT NOW());
-CREATE TABLE IF NOT EXISTS portfolio_settings (id TEXT PRIMARY KEY, payload JSONB NOT NULL, updated_at TIMESTAMPTZ DEFAULT NOW());
-ALTER TABLE portfolio_partners ENABLE ROW LEVEL SECURITY;
-ALTER TABLE portfolio_projects ENABLE ROW LEVEL SECURITY;
-ALTER TABLE portfolio_settings ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Public All Partners" ON portfolio_partners;
-DROP POLICY IF EXISTS "Public All Projects" ON portfolio_projects;
-DROP POLICY IF EXISTS "Public All Settings" ON portfolio_settings;
-CREATE POLICY "Public All Partners" ON portfolio_partners FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Public All Projects" ON portfolio_projects FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Public All Settings" ON portfolio_settings FOR ALL USING (true) WITH CHECK (true);</pre>
+          <pre id="supabaseSqlCode" class="bg-flatBg border border-flatBorder rounded-xl p-4 text-[11px] text-blue-200 overflow-x-auto font-mono" dir="ltr">-- The database schema (public read, admin-only write) lives in supabase-schema.sql in the GitHub repo.</pre>
         </div>
 
       </div>
@@ -1349,7 +1333,6 @@ CREATE POLICY "Public All Settings" ON portfolio_settings FOR ALL USING (true) W
       phone: '01150741729',
       email: 'abdelmoneimashrafdiab@gmail.com',
       whatsappUrl: 'https://wa.me/message/2XHBZLZQRZ42O1',
-      adminPass: 'admin2026',
       themePrimary: '#1E6BFF',
       themeAccent: '#FACC15',
       themeBg: '#0E131B',
@@ -2226,7 +2209,6 @@ Return ONLY a valid JSON object with keys:
       document.getElementById('setPhone').value = siteSettings.phone || '';
       document.getElementById('setEmail').value = siteSettings.email || '';
       document.getElementById('setWhatsappUrl').value = siteSettings.whatsappUrl || '';
-      document.getElementById('setAdminPass').value = siteSettings.adminPass || 'admin2026';
       document.getElementById('setCtaExplore').value = siteSettings.ctaExploreAr || '';
       document.getElementById('setCtaWhatsapp').value = siteSettings.ctaWhatsappAr || '';
     }
@@ -2349,7 +2331,6 @@ Return ONLY a valid JSON object with keys:
       siteSettings.phone = document.getElementById('setPhone').value.trim();
       siteSettings.email = document.getElementById('setEmail').value.trim();
       siteSettings.whatsappUrl = document.getElementById('setWhatsappUrl').value.trim();
-      siteSettings.adminPass = document.getElementById('setAdminPass').value.trim() || 'admin2026';
       siteSettings.ctaExploreAr = document.getElementById('setCtaExplore').value.trim();
       siteSettings.ctaWhatsappAr = document.getElementById('setCtaWhatsapp').value.trim();
       await syncAllToSupabase();
@@ -2811,26 +2792,37 @@ Return ONLY a valid JSON object with keys:
       }, 600);
     }
 
-    function handleAdminLogin() {
-      const pass = document.getElementById('adminLoginPass').value.trim();
-      if (pass === (siteSettings.adminPass || 'admin2026')) {
-        isAdminLoggedIn = true;
-        document.getElementById('adminLoginGate').classList.add('hidden');
-        document.getElementById('adminDashboardContent').classList.remove('hidden');
-        document.getElementById('adminLoginError').classList.add('hidden');
-        const liveBar = document.getElementById('liveAdminFloatingBar');
-        if (liveBar) liveBar.classList.remove('hidden');
-        renderAll();
-        showToast('أهلاً بك يا منعم! تم تفعيل وضع التحكم الكامل والربط مع السابا بيز');
-      } else {
-        const err = document.getElementById('adminLoginError');
-        err.textContent = 'كلمة المرور غير صحيحة (الافتراضية: admin2026)';
-        err.classList.remove('hidden');
+    async function handleAdminLogin() {
+      const email = document.getElementById('adminLoginUser').value.trim();
+      const pass = document.getElementById('adminLoginPass').value;
+      const err = document.getElementById('adminLoginError');
+      const fail = (msg) => { err.textContent = msg; err.classList.remove('hidden'); };
+      if (!email || !pass) return fail('اكتب الإيميل وكلمة المرور');
+      if (!supabaseClient) { try { await initSupabaseConnection(); } catch (e) {} }
+      if (!supabaseClient) return fail('تعذر الاتصال بالسيرفر، حاول مرة أخرى');
+      const { error: authErr } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
+      if (authErr) return fail('الإيميل أو كلمة المرور غير صحيحة');
+      const { data: isAdmin } = await supabaseClient.rpc('is_portfolio_admin');
+      if (!isAdmin) {
+        await supabaseClient.auth.signOut();
+        return fail('هذا الحساب غير مصرح له بالدخول للوحة التحكم');
       }
+      isAdminLoggedIn = true;
+      document.getElementById('adminLoginPass').value = '';
+      document.getElementById('adminLoginGate').classList.add('hidden');
+      document.getElementById('adminDashboardContent').classList.remove('hidden');
+      err.classList.add('hidden');
+      const liveBar = document.getElementById('liveAdminFloatingBar');
+      if (liveBar) liveBar.classList.remove('hidden');
+      // Re-read the cloud with the admin session (also seeds an empty database once).
+      try { await initSupabaseConnection(); } catch (e) {}
+      renderAll();
+      showToast('أهلاً بك يا منعم! تم تفعيل وضع التحكم الكامل والربط مع Supabase');
     }
 
     function handleAdminLogout() {
       isAdminLoggedIn = false;
+      try { if (supabaseClient) supabaseClient.auth.signOut(); } catch (e) {}
       document.getElementById('adminLoginGate').classList.remove('hidden');
       document.getElementById('adminDashboardContent').classList.add('hidden');
       const liveBar = document.getElementById('liveAdminFloatingBar');
@@ -2996,6 +2988,7 @@ Return ONLY a valid JSON object with keys:
     }
 
     async function syncAllToSupabase(showExplicitToast = false) {
+      delete siteSettings.adminPass; // legacy field: never store a password in the public settings row
       saveStoredData();
       if (!supabaseClient) {
         const sbUrl = localStorage.getItem('ad_supabase_url') || DEFAULT_SUPABASE_URL;
