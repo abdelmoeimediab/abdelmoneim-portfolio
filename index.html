@@ -18,6 +18,11 @@
       try { l = localStorage.getItem('lang') || (navigator.language || '').slice(0, 2); } catch (e) {}
       if (l === 'ar') { d.lang = 'ar'; d.dir = 'rtl'; }
       d.classList.add('js');
+      // Theme: the visitor's saved choice, otherwise the device setting (light / dark).
+      var th = null;
+      try { th = localStorage.getItem('theme'); } catch (e) {}
+      if (th !== 'dark' && th !== 'light') th = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      d.setAttribute('data-theme', th);
       if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
       try { if (sessionStorage.getItem('introSeen')) d.classList.add('intro-seen'); } catch (e) {}
     })();
@@ -44,6 +49,7 @@
       <button type="button" data-lang="en" lang="en">EN</button>
       <button type="button" data-lang="ar" lang="ar">AR</button>
     </div>
+    <button type="button" class="theme-btn" id="themeBtn"><i aria-hidden="true"></i></button>
     <button type="button" class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="menu">
       <span class="menu-btn__icon" aria-hidden="true"><i></i><i></i></span>
       <span class="menu-btn__label" id="menuBtnLabel"></span>

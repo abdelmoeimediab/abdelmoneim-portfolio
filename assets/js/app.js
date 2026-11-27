@@ -185,8 +185,11 @@
   // on the company page, the full-colour logo. Without a logo, the name set as a wordmark.
   function companyMark(c, cls, strip) {
     var inner;
-    if (c.logo && strip) inner = '<img class="logo-mono" src="' + esc(c.logoMono || c.logo) + '" alt="' + esc(coName(c)) + '"><img class="logo-color" src="' + esc(c.logo) + '" alt="" aria-hidden="true">';
-    else if (c.logo) inner = '<img src="' + esc(c.logo) + '" alt="' + esc(coName(c)) + '">';
+    // .logo-mask paints the one-colour logo in the current text colour (used in dark mode).
+    // (absolute URL: a url() inside a custom property resolves against the stylesheet, not the page)
+    var mask = c.logo ? '<span class="logo-mask" aria-hidden="true" style="--m:url(\'' + esc(new URL(c.logoMono || c.logo, location.href).href) + '\')"></span>' : '';
+    if (c.logo && strip) inner = '<img class="logo-mono" src="' + esc(c.logoMono || c.logo) + '" alt="' + esc(coName(c)) + '"><img class="logo-color" src="' + esc(c.logo) + '" alt="" aria-hidden="true">' + mask;
+    else if (c.logo) inner = '<img src="' + esc(c.logo) + '" alt="' + esc(coName(c)) + '">' + mask;
     else if (strip && c.short) inner = brand(c.short);   // long names use their short form in the strip only
     else inner = lang === 'ar' ? esc(coName(c)) : esc(c.nameEn);
     return '<span class="' + cls + (c.logo ? ' has-logo' : '') + '" data-mark="' + esc(c.id) + '">' + inner + '</span>';
@@ -654,8 +657,9 @@
       if (ls) cleanups.push(function () { ls.revert(); });
       var units = ls ? ls.chars : [lead];
       var ftl = G.timeline({ scrollTrigger: { trigger: lead, start: 'top 82%', end: 'bottom 42%', scrub: .5 } });
-      ftl.fromTo(units, { color: '#BDB8AA' }, { color: '#00AA83', stagger: .03, duration: .2, ease: 'none' })
-        .to(units, { color: '#1C2320', stagger: .03, duration: .2, ease: 'none' }, .18);
+      var cv = getComputedStyle(root);
+      ftl.fromTo(units, { color: cv.getPropertyValue('--fill-from').trim() }, { color: cv.getPropertyValue('--teal').trim(), stagger: .03, duration: .2, ease: 'none' })
+        .to(units, { color: cv.getPropertyValue('--ink').trim(), stagger: .03, duration: .2, ease: 'none' }, .18);
     }
 
     var nums = $$('[data-count]', view);
@@ -698,7 +702,10 @@
     if (!window.PortraitGL) return null;
     var heroImg = $('#heroImg'), slot = $('#aboutSlot'), plate = $('#aboutPlate');
     if (!heroImg || !slot || !plate) return null;
-    var p = window.PortraitGL.create({ src: 'assets/portrait/portrait.webp', from: heroImg, to: slot });
+    // Halftone ink follows the theme (dark dots on the light theme, teal dots on the dark one).
+    var hex = getComputedStyle(root).getPropertyValue('--halftone').trim().replace('#', '');
+    var ink = hex.length === 6 ? [0, 2, 4].map(function (i) { return parseInt(hex.substr(i, 2), 16); }) : null;
+    var p = window.PortraitGL.create({ src: 'assets/portrait/portrait.webp', from: heroImg, to: slot, ink: ink });
     if (!p) return null;
     document.body.appendChild(p.canvas);
     var tick = function () { p.render(); };
@@ -768,8 +775,9 @@
           g.drawImage(img, (SIZE - w) / 2, (SIZE - h) / 2, w, h);
         } else {
           // Placeholder: a stone disc with the entry number, until the real photo arrives.
-          g.fillStyle = '#CBC7BA'; g.fillRect(0, 0, SIZE, SIZE);
-          g.fillStyle = '#565C57'; g.font = '400 104px Gloock, serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+          var cv = getComputedStyle(root);
+          g.fillStyle = cv.getPropertyValue('--stone-3').trim() || '#CBC7BA'; g.fillRect(0, 0, SIZE, SIZE);
+          g.fillStyle = cv.getPropertyValue('--ink-2').trim() || '#565C57'; g.font = '400 104px Gloock, serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
           g.fillText(String(idx + 1).padStart(2, '0'), SIZE / 2, SIZE / 2 + 6);
         }
         var photo = c.toDataURL('image/png'), ht = halftoneFrom(c, SIZE, 7, '#1C2320');
@@ -1124,6 +1132,7 @@
     document.title = t.title;
     renderMenu();
     renderFooter();
+    if (typeof themeChrome === 'function' && themeBtn) themeChrome();
     $('[data-t="markName"]').textContent = p.name.join(' ');
     $('[data-t="markLab"]').textContent = p.lab;
     $('.mark').setAttribute('aria-label', t.nav.home);
@@ -1143,6 +1152,38 @@
       else swap();
     });
   });
+
+  /* ---------- theme (light / dark) ---------- */
+  var themeBtn = document.getElementById('themeBtn');
+  var mqDark = window.matchMedia('(prefers-color-scheme: dark)');
+  function theme() { return root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
+  function themeChrome() {
+    var dark = theme() === 'dark';
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', dark ? '#0C1210' : '#E7E5DE');
+    var label = lang === 'ar' ? (dark ? 'الوضع الفاتح' : 'الوضع الداكن') : (dark ? 'Light mode' : 'Dark mode');
+    themeBtn.setAttribute('aria-label', label);
+    themeBtn.setAttribute('title', label);
+  }
+  // Rebuild the view so canvas-drawn pieces (portrait halftone, colour fill) pick up the new colours.
+  function setTheme(t, save) {
+    if (t === theme()) return;
+    if (save) { try { localStorage.setItem('theme', t); } catch (e) {} }
+    var swap = function () {
+      root.setAttribute('data-theme', t);
+      themeChrome();
+      if (current) { var r = current; current = null; show(r); enter(r); }
+    };
+    if (motion && current) G.to(view, { autoAlpha: 0, duration: .25, onComplete: function () { swap(); G.to(view, { autoAlpha: 1, duration: .4, clearProps: 'all' }); } });
+    else swap();
+  }
+  themeBtn.addEventListener('click', function () { setTheme(theme() === 'dark' ? 'light' : 'dark', true); });
+  var onSystem = function (e) {
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (err) {}
+    if (!saved) setTheme(e.matches ? 'dark' : 'light', false);   // follow the device unless the visitor chose
+  };
+  if (mqDark.addEventListener) mqDark.addEventListener('change', onSystem);
 
   var lastY = 0;
   function onScroll(y) {

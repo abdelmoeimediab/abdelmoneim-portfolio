@@ -10,6 +10,9 @@
   --ink-2: #565C57;
   --teal: #00AA83;
   --teal-ink: #00694F;
+  --line: rgba(28, 35, 32, .25);
+  --fill-from: #BDB8AA;
+  --halftone: #1C2320;
 
   --f-display: 'Gloock', 'Times New Roman', serif;
   --f-sans: 'Schibsted Grotesk', system-ui, sans-serif;
@@ -436,7 +439,7 @@ html[lang="ar"] .menu__link { font-family: 'Alexandria', sans-serif; font-weight
 .hero__labels {
   position: absolute; z-index: 3; top: calc(var(--header-h) + 4px); inset-inline: var(--pad);
   display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px;
-  font-size: 13px; font-weight: 600; border-bottom: 1px solid rgba(28, 35, 32, .25);
+  font-size: 13px; font-weight: 600; border-bottom: 1px solid var(--line);
 }
 .hero__name { top: calc(var(--header-h) + 48px); }
 html[lang="ar"] .hero__name { top: calc(var(--header-h) + 36px); }
@@ -462,7 +465,7 @@ html[lang="ar"] .info__num { font-weight: 600; font-size: 1.6em; }
 
 /* Footer */
 .foot { position: relative; z-index: 1; background: var(--teal); color: var(--ink); padding: 36px var(--pad) 22px; overflow: hidden; }
-.foot__top { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid rgba(28, 35, 32, .25); font-size: 13px; font-weight: 600; }
+.foot__top { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--line); font-size: 13px; font-weight: 600; }
 .foot__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin: clamp(40px, 8vh, 80px) 0 clamp(24px, 4vh, 40px); }
 .foot__col { display: grid; gap: 4px; align-content: start; justify-items: start; font-size: 17px; font-weight: 500; }
 .foot__col--end { justify-items: end; text-align: end; }
@@ -649,3 +652,106 @@ html[lang="ar"] .company__cat-title { font-weight: 600; line-height: 1.35; }
   .intro { display: none; }
   .cursor { display: none; }
 }
+
+/* =====================================================================
+   Dark mode: follows the device (prefers-color-scheme) unless the visitor picks one with the header button.
+   Deep green-black (never pure #000) with soft teal glows and a glossy header.
+   ===================================================================== */
+.theme-btn { display: grid; place-items: center; width: 32px; height: 32px; color: inherit; }
+.theme-btn i {
+  width: 15px; height: 15px; border-radius: 50%; border: 2px solid currentColor;
+  background: linear-gradient(90deg, currentColor 50%, transparent 50%); transition: transform .6s var(--ease-out);
+}
+html[data-theme="dark"] .theme-btn i { transform: rotate(180deg); }
+.theme-btn:hover i { transform: rotate(90deg); }
+html[data-theme="dark"] .theme-btn:hover i { transform: rotate(270deg); }
+
+.logo-mask { display: none; position: absolute; inset: 0; background: currentColor;
+  -webkit-mask: var(--m) no-repeat left center / contain; mask: var(--m) no-repeat left center / contain; }
+html[dir="rtl"] .logo-mask { -webkit-mask-position: right center; mask-position: right center; }
+
+html[data-theme="dark"] {
+  --stone: #0C1210;
+  --stone-2: #131B18;
+  --stone-3: #26322D;
+  --ink: #ECEAE3;
+  --ink-2: #98A29C;
+  --teal-ink: #3FD9B0;
+  --line: rgba(236, 234, 227, .16);
+  --fill-from: #3A4742;
+  --halftone: #3FD9B0;
+  color-scheme: dark;
+}
+html[data-theme="dark"] body {
+  background:
+    radial-gradient(1100px 680px at 88% -8%, rgba(0, 170, 131, .16), transparent 62%),
+    radial-gradient(900px 620px at -12% 108%, rgba(0, 170, 131, .10), transparent 60%),
+    linear-gradient(180deg, #0D1412 0%, #0A0F0D 100%) fixed;
+  background-attachment: fixed;
+}
+/* sections let the page gradient through */
+html[data-theme="dark"] .about,
+html[data-theme="dark"] .clients-show,
+html[data-theme="dark"] .circle { background: transparent; }
+
+/* glossy header */
+html[data-theme="dark"] .site-header { background: rgba(12, 18, 16, .66); -webkit-backdrop-filter: blur(16px) saturate(1.3); backdrop-filter: blur(16px) saturate(1.3); }
+html[data-theme="dark"] .site-header.on-hero, html[data-theme="dark"].menu-open .site-header { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+
+/* hero: dark with a teal glow behind the portrait and a soft sheen */
+html[data-theme="dark"] .hero {
+  background:
+    radial-gradient(52% 62% at 70% 66%, rgba(0, 170, 131, .42) 0%, rgba(0, 170, 131, .12) 45%, rgba(0, 170, 131, 0) 72%),
+    radial-gradient(40% 50% at 8% 0%, rgba(63, 217, 176, .10), transparent 70%),
+    linear-gradient(180deg, #0F1B18 0%, #0A110F 100%);
+}
+html[data-theme="dark"][dir="rtl"] .hero {
+  background:
+    radial-gradient(52% 62% at 30% 66%, rgba(0, 170, 131, .42) 0%, rgba(0, 170, 131, .12) 45%, rgba(0, 170, 131, 0) 72%),
+    radial-gradient(40% 50% at 92% 0%, rgba(63, 217, 176, .10), transparent 70%),
+    linear-gradient(180deg, #0F1B18 0%, #0A110F 100%);
+}
+html[data-theme="dark"] .hero::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background: linear-gradient(115deg, rgba(255, 255, 255, .06) 0%, rgba(255, 255, 255, 0) 38%);
+}
+html[data-theme="dark"] .hero__name { color: var(--ink); }
+html[data-theme="dark"][lang="ar"] .sig { color: var(--teal-ink); }
+html[data-theme="dark"] .about__plate {
+  background: radial-gradient(80% 70% at 50% 75%, #13C99A 0%, #00AA83 45%, #007A5E 100%);
+}
+
+/* curtain, menu, footer */
+html[data-theme="dark"] .curtain { color: #0B1311; background: linear-gradient(160deg, #13C99A 0%, #00AA83 50%, #00785C 100%); }
+html[data-theme="dark"] .menu {
+  background:
+    radial-gradient(70% 60% at 50% 40%, rgba(0, 170, 131, .16), transparent 70%),
+    #0B110F;
+}
+html[data-theme="dark"] .foot {
+  background:
+    radial-gradient(60% 90% at 50% 120%, rgba(0, 170, 131, .45), transparent 70%),
+    linear-gradient(180deg, #0F1B18 0%, #0A110F 100%);
+  color: var(--ink);
+}
+html[data-theme="dark"] .foot__name { color: var(--teal-ink); }
+html[data-theme="dark"] .foot__track .star { color: var(--ink); }
+
+/* strips and logos: one light ink colour, teal on hover */
+html[data-theme="dark"] .co-strip { background: rgba(255, 255, 255, .03); }
+html[data-theme="dark"] .co-chip__mark.has-logo img { opacity: 0 !important; }
+html[data-theme="dark"] .co-chip__mark .logo-mask, html[data-theme="dark"] .company__mark .logo-mask { display: block; }
+html[data-theme="dark"] .co-chip__mark.has-logo { color: var(--ink); }
+html[data-theme="dark"] .co-chip:hover .co-chip__mark.has-logo { color: var(--teal-ink); }
+html[data-theme="dark"] .company__mark.has-logo { position: relative; color: var(--ink); }
+html[data-theme="dark"] .company__mark.has-logo img { opacity: 0; }
+html[data-theme="dark"] .co-fly { color: var(--ink); }
+html[data-theme="dark"] .co-fly img { opacity: 0; }
+html[data-theme="dark"] .co-fly .logo-mask { display: block; }
+
+/* small surfaces */
+html[data-theme="dark"] .item__media, html[data-theme="dark"] .reel__media { background: var(--stone-2); }
+html[data-theme="dark"] .item__play { background: rgba(12, 18, 16, .8); }
+html[data-theme="dark"] .item__play::before { border-left-color: var(--ink); }
+html[data-theme="dark"] .peer__av { background: var(--stone-3); }
+html[data-theme="dark"] ::selection { color: #0B1311; }
