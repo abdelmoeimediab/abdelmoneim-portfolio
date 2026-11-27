@@ -755,3 +755,126 @@ html[data-theme="dark"] .item__play { background: rgba(12, 18, 16, .8); }
 html[data-theme="dark"] .item__play::before { border-left-color: var(--ink); }
 html[data-theme="dark"] .peer__av { background: var(--stone-3); }
 html[data-theme="dark"] ::selection { color: #0B1311; }
+
+/* =====================================================================
+   Large and ultra-wide screens: above 1600px everything scales with the screen width, using the 1440px layout as
+   the reference (1vw = 14.4px there), so text, spacing and controls grow together with the giant name.
+   Hero sizes use min(vw, vh) so wide-but-short screens (21:9) never make the copy collide with the name.
+   ===================================================================== */
+@media (min-width: 1600px) {
+  :root { --pad: 3.9vw; --gap: 1.95vw; --header-h: 5.3vw; }
+  body { font-size: 1.18vw; }
+  html[lang="ar"] body { font-size: 1.11vw; }
+
+  /* header */
+  .site-header { gap: .9vw; }
+  .mark { gap: .85vw; }
+  .mark__glyph { width: .76vw; height: 1.4vw; }
+  .mark:hover .mark__glyph { width: 1.5vw; height: .85vw; }
+  .mark__name { font-size: 1.04vw; }
+  .mark__lab { font-size: .9vw; }
+  .lang { font-size: .9vw; }
+  .lang button { padding: .42vw .56vw; }
+  .theme-btn { width: 2.2vw; height: 2.2vw; }
+  .theme-btn i { width: 1.05vw; height: 1.05vw; border-width: .14vw; }
+  .menu-btn { font-size: .9vw; padding: .62vw .97vw; gap: .7vw; }
+  .menu-btn__icon { width: .97vw; gap: .28vw; }
+  .menu-btn__icon i { height: .14vw; }
+
+  /* hero */
+  .hero__labels { font-size: min(.9vw, 1.9vh); padding-bottom: .7vw; }
+  .hero__labels .star { width: 1.1vw; height: 1.1vw; }
+  .hero__name { top: calc(var(--header-h) + 3.3vw); }
+  html[lang="ar"] .hero__name { top: calc(var(--header-h) + 2.5vw); }
+  .hero__copy { width: 44vw; gap: min(1.1vw, 2.4vh); bottom: min(5.8vw, 8vh); }
+  .hero__tagline { font-size: min(3.6vw, 7vh); }
+  html[lang="ar"] .hero__tagline { font-size: min(2.9vw, 6.6vh); }
+  .hero__title { font-size: min(1.25vw, 2.8vh); }
+  .hero__actions { gap: min(.85vw, 1.4vh) min(1.8vw, 3vh); margin-top: min(.55vw, .9vh); }
+  .hero__actions .btn, .hero__actions .link-quiet { font-size: min(1.11vw, 2.5vh); }
+  .hero__actions .btn { padding: min(1.1vw, 2.4vh) min(1.66vw, 3.6vh); gap: min(.85vw, 1.9vh); }
+  .btn__glyph { width: .56vw; height: .97vw; }
+  .btn:hover .btn__glyph { width: .97vw; height: .56vw; }
+  .hero__meta { font-size: min(.9vw, 2vh); gap: .4vw 1.66vw; margin-top: min(.97vw, 1.6vh); }
+
+  /* buttons and links elsewhere */
+  .btn { font-size: 1.11vw; padding: 1.1vw 1.66vw; gap: .85vw; }
+
+  /* about */
+  .about { padding-top: 11vw; }
+  .about__title { font-size: 6.1vw; }
+  .about__copy { font-size: 1.32vw; gap: 1.25vw; margin-top: 2.6vw; }
+  .about__copy p:first-child { font-size: 2.2vw; }
+  html[lang="ar"] .about__copy p:first-child { font-size: 1.88vw; }
+  .info { margin-top: 3.6vw; max-width: 44vw; }
+  .info__row { font-size: 1.04vw; padding: 1.04vw 0; gap: 1.4vw; grid-template-columns: minmax(7.6vw, 1fr) 2fr; }
+  .about__media { top: calc(var(--header-h) + 2.2vw); }
+
+  /* clients strip */
+  .clients-show { padding-top: 11vw; padding-bottom: 5vw; }
+  .clients-show__title { font-size: 5.5vw; }
+  .clients-show__intro { font-size: 1.18vw; }
+  .clients-show__head { margin-bottom: 3.6vw; }
+  .co-strip { padding-block: 1.8vw 2.1vw; }
+  .co-track { gap: 6.4vw; padding-inline-end: 6.4vw; }
+  .co-chip { gap: .42vw; }
+  .co-chip__mark { font-size: 2.36vw; }
+  html[lang="ar"] .co-chip__mark:not(.has-logo) { font-size: 1.94vw; }
+  .co-chip__mark.has-logo { height: 4.4vw; }
+  .co-chip__mark img { max-width: 15.3vw; }
+  .co-chip__ind { font-size: .9vw; }
+
+  /* creative circle */
+  .circle { padding: 8vw 0 9vw; }
+  .circle__title { font-size: 7.2vw; margin-bottom: 3.6vw; }
+  html[lang="ar"] .circle__title { font-size: 6.1vw; }
+  .circle__track { gap: 3.9vw; padding-inline-end: 3.9vw; }
+  .peer { width: 13.9vw; }
+  .peer__name { font-size: 1.11vw; }
+  .peer__role { font-size: .97vw; }
+
+  /* footer */
+  .foot { padding: 2.5vw var(--pad) 1.5vw; }
+  .foot__top, .foot__legal { font-size: .9vw; }
+  .foot__top .star { width: 1.1vw; height: 1.1vw; }
+  .foot__grid { margin: 5.5vw 0 2.8vw; gap: 2.2vw; }
+  .foot__col { font-size: 1.18vw; }
+  .foot__k { font-size: .9vw; margin-top: .97vw; }
+
+  /* menu */
+  .menu__foot { font-size: .97vw; }
+  .menu__socials { gap: 1.5vw; }
+
+  /* inner pages */
+  .page { padding: 6.6vw var(--pad) 8.3vw; }
+  .page-intro { font-size: 1.39vw; }
+  .filters { font-size: 1.18vw; gap: .42vw 1.53vw; }
+  .filters sup { font-size: .76vw; }
+  .cat { padding-top: 8.3vw; grid-template-columns: minmax(13.9vw, 1fr) 3fr; }
+  .cat__name { font-size: 3.2vw; }
+  .cat__desc, .cat__meta { font-size: 1.04vw; }
+  .item__title { font-size: 1.11vw; }
+  .item__sub { font-size: .97vw; }
+  .item__play { width: 2.36vw; height: 2.36vw; }
+  .reel { --h: min(56svh, 37.5vw); }
+  .reel__label, .reel__cap, .reel__count { font-size: .97vw; }
+  .job__role { font-size: 2.64vw; }
+  .job__period, .job__place { font-size: 1.04vw; }
+  .edu p { font-size: 2.1vw; }
+  .contact-big { font-size: 2.1vw; }
+  .contact-list { font-size: 1.25vw; }
+  .contact-block h2, .contact-foot { font-size: .97vw; }
+  .company { padding: 2.2vw var(--pad) 8.3vw; }
+  .company__bar { font-size: .97vw; }
+  .company__mark { font-size: 11.7vw; }
+  .company__mark.has-logo { height: 13.9vw; }
+  .company__about > p { font-size: 2.36vw; }
+  html[lang="ar"] .company__about > p { font-size: 1.94vw; }
+  .company__h { font-size: 1.04vw; }
+  .company__cat-title { font-size: 3.05vw; }
+  .company__intro p { font-size: 1.32vw; }
+  .cursor.is-label { width: 5.3vw; height: 5.3vw; margin: -2.65vw 0 0 -2.65vw; }
+  .cursor span { font-size: .9vw; }
+}
+/* Headlines break into even lines at every width ("Ideas into visuals. / Visuals into impact.") */
+.hero__tagline, .contact-title, .about__copy p:first-child, .company__about > p { text-wrap: balance; }
