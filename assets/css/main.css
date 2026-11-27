@@ -439,7 +439,9 @@ html[lang="ar"] .menu__link { font-family: 'Alexandria', sans-serif; font-weight
   font-size: 13px; font-weight: 600; border-bottom: 1px solid rgba(28, 35, 32, .25);
 }
 .hero__name { top: calc(var(--header-h) + 48px); }
-html[lang="ar"] .hero__name { top: calc(var(--header-h) + 40px); }
+html[lang="ar"] .hero__name { top: calc(var(--header-h) + 36px); }
+/* Arabic ascenders (hamza, alef) need more room inside the reveal mask so their tops are never clipped. */
+html[lang="ar"] .hero__word { padding-block: .2em .08em; }
 /* Arabic words are short, so a full-width name would hide a whole word behind the head: keep it clear of it. */
 @media (min-width: 901px) { html[lang="ar"] .hero__name { inset-inline-end: 42%; } }
 .hero__name .sig { padding-inline-end: .02em; }
@@ -546,7 +548,22 @@ html[dir="rtl"] .co-row:hover .co-row__mark { transform: translateX(-14px); }
 .is-pending { color: var(--ink-2); font-style: italic; }
 html[lang="ar"] .is-pending { font-style: normal; opacity: .8; }
 
-/* Logo in flight between the clients list and the company header */
+/* Clients strip (auto-scrolling, eases to a stop on hover; each logo opens its company page) */
+.co-strip { display: flex; overflow-x: auto; scrollbar-width: none; margin-inline: calc(-1 * var(--pad)); padding-block: 26px 30px; background: var(--stone-2); user-select: none; }
+.co-strip::-webkit-scrollbar { display: none; }
+.co-strip.is-js { overflow: hidden; }
+.co-track { display: flex; flex-shrink: 0; align-items: center; gap: clamp(48px, 6vw, 96px); padding-inline-end: clamp(48px, 6vw, 96px); padding-inline-start: 0; }
+.co-chip { display: grid; justify-items: start; gap: 6px; text-align: start; padding: 8px 0; }
+.co-chip__mark {
+  display: inline-block; white-space: nowrap; font-family: var(--f-display); font-size: clamp(28px, 3vw, 46px); line-height: 1.05; letter-spacing: -.015em;
+  transition: color .4s, transform .6s var(--ease-out);
+}
+html[lang="ar"] .co-chip__mark { font-family: 'Gloock', serif; }
+.co-chip__mark img { height: 1.1em; width: auto; }
+.co-chip__ind { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+.co-chip:hover .co-chip__mark, .co-chip:focus-visible .co-chip__mark { color: var(--teal-ink); transform: translateY(-4px); }
+
+/* Logo in flight between the clients strip and the company header */
 .co-fly { z-index: 60; margin: 0; white-space: nowrap; color: var(--ink); pointer-events: none; will-change: transform; display: block; }
 .co-fly img { height: 100%; width: auto; }
 

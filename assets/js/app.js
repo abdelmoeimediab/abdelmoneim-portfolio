@@ -181,23 +181,25 @@
     return '<span class="' + cls + '" data-mark="' + esc(c.id) + '">' +
       (c.logo ? '<img src="' + esc(c.logo) + '" alt="' + esc(c.name) + '">' : brand(c.name)) + '</span>';
   }
+  // Clients: an auto-scrolling strip of logos (wordmarks until the logos arrive), each one opens its company page.
   function clientsShowcase() {
     var t = ui();
-    var rows = (S.companies || []).map(function (c) {
-      var ind = L(c, 'industry') || t.pending;
-      return '<button type="button" class="co-row" data-company="' + esc(c.id) + '" data-cursor="' + esc(t.open) + '" aria-label="' + esc(c.name) + '">' +
-          companyMark(c, 'co-row__mark') +
-          '<span class="co-row__ind' + (L(c, 'industry') ? '' : ' is-pending') + '">' + esc(ind) + '</span>' +
-          '<span class="co-row__go" aria-hidden="true">' + STAR + '</span>' +
-        '</button>';
-    }).join('');
+    var items = function (copy) {
+      return (S.companies || []).map(function (c) {
+        var ind = L(c, 'industry');
+        return '<li><button type="button" class="co-chip" data-company="' + esc(c.id) + '" data-cursor="' + esc(t.open) + '" aria-label="' + esc(c.name) + '"' + (copy ? ' tabindex="-1"' : '') + '>' +
+            companyMark(c, 'co-chip__mark') +
+            '<span class="co-chip__ind' + (ind ? '' : ' is-pending') + '">' + esc(ind || t.pending) + '</span>' +
+          '</button></li>';
+      }).join('');
+    };
     return '' +
       '<section class="clients-show" id="clients" aria-labelledby="clientsTitle">' +
         '<div class="clients-show__head">' +
           '<h2 class="clients-show__title" id="clientsTitle" data-reveal>' + esc(t.clientsTitle) + '</h2>' +
           '<p class="clients-show__intro" data-reveal>' + esc(t.clientsIntro) + '</p>' +
         '</div>' +
-        '<div class="co-list">' + rows + '</div>' +
+        '<div class="co-strip" id="coStrip"><ul class="co-track">' + items(false) + '</ul><ul class="co-track" aria-hidden="true">' + items(true) + '</ul></div>' +
       '</section>';
   }
 
@@ -310,7 +312,7 @@
   }
 
   function startMorph(row) {
-    var mark = row.querySelector('.co-row__mark');
+    var mark = row.querySelector('[data-mark]');
     if (!mark || !motion) return;
     var r = mark.getBoundingClientRect(), cs = getComputedStyle(mark);
     var clone = mark.cloneNode(true);
@@ -515,7 +517,7 @@
     if (current.name === 'home') {
       bindHome();
       buildPeers();
-      $$('.co-row', view).forEach(function (row) {
+      $$('.co-chip', view).forEach(function (row) {
         row.addEventListener('click', function () {
           startMorph(row);
           location.hash = '#/client/' + row.getAttribute('data-company');
@@ -634,10 +636,12 @@
     });
     // The lead sentence fills with colour as it scrolls through: grey, then teal at the leading edge, then ink.
     var lead = $('[data-fill]', view);
-    if (lead && Split) {
-      var ls = new Split(lead, { type: lang === 'en' ? 'words,chars' : 'words' });
-      cleanups.push(function () { ls.revert(); });
-      var units = lang === 'en' ? ls.chars : ls.words;
+    // Arabic is never split (splitting breaks letter joins and the order of the English words inside <bdi>),
+    // so it fills as one block.
+    if (lead && (Split || lang === 'ar')) {
+      var ls = lang === 'en' ? new Split(lead, { type: 'words,chars' }) : null;
+      if (ls) cleanups.push(function () { ls.revert(); });
+      var units = ls ? ls.chars : [lead];
       var ftl = G.timeline({ scrollTrigger: { trigger: lead, start: 'top 82%', end: 'bottom 42%', scrub: .5 } });
       ftl.fromTo(units, { color: '#BDB8AA' }, { color: '#00AA83', stagger: .03, duration: .2, ease: 'none' })
         .to(units, { color: '#1C2320', stagger: .03, duration: .2, ease: 'none' }, .18);
@@ -652,10 +656,10 @@
         });
       } });
     }
-    // Clients list rows arrive in sequence; the Creative Circle strip runs on its own.
-    var rows = $$('.co-row', view);
-    if (rows.length) G.from(rows, { y: 34, autoAlpha: 0, duration: 1, ease: 'expo.out', stagger: .07, clearProps: 'all', scrollTrigger: { trigger: '.co-list', start: 'top 88%', once: true } });
+    // Both strips (clients, Creative Circle) run on their own and ease to a stop on hover.
+    stripMotion($('#coStrip'), '.co-track', 40);
     circleMotion();
+    sectionSnap();
 
     // Cursor depth: the portrait tilts a few degrees and drifts slightly; the name drifts the other way.
     if (fine && hero) {
@@ -772,12 +776,55 @@
   }
 
   // The strip scrolls on its own; hovering it eases the speed down to a stop, leaving eases it back up.
-  function circleMotion() {
-    var strip = $('#circleStrip');
+  function circleMotion() { stripMotion($('#circleStrip'), '.circle__track', 46); }
+
+  /* Home, mouse wheel: at the edge of a section, one wheel step carries you to the next (or previous) section in a
+     single smooth move, and the portrait morph plays along with it. Inside a section taller than the screen, the
+     wheel scrolls normally until its end. Touch scrolling is left alone. */
+  function sectionSnap() {
+    if (!lenis) return;
+    var secs = ['#hero', '#about', '#clients', '#circle'].map(function (s) { return $(s, view); }).filter(Boolean);
+    var foot = $('#foot');
+    if (foot) secs.push(foot);
+    var snapping = false;
+    var ease = function (t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+    var topOf = function (el) { return el.getBoundingClientRect().top + window.scrollY; };
+    var onWheel = function (e) {
+      if (menuOpen || !viewer.hidden || e.ctrlKey || current.name !== 'home') return;
+      if (snapping) { e.preventDefault(); e.stopImmediatePropagation(); return; }
+      var dy = e.deltaY;
+      if (Math.abs(dy) < 1) return;
+      var y = window.scrollY, vh = window.innerHeight;
+      var maxY = document.documentElement.scrollHeight - vh;
+      var tops = secs.map(topOf), i = 0;
+      for (var k = 0; k < secs.length; k++) if (tops[k] <= y + 4) i = k;
+      var target = null;
+      if (dy > 0) {
+        var end = tops[i] + secs[i].offsetHeight;
+        if ((i === 0 || end - (y + vh) <= 4) && i + 1 < secs.length) target = Math.min(tops[i + 1], maxY);
+      } else if (i === 0) {
+        if (y > 4) target = 0;
+      } else if (y - tops[i] <= 4) {
+        var p = i - 1, ph = secs[p].offsetHeight;
+        target = p === 0 ? 0 : (ph > vh ? tops[p] + ph - vh : tops[p]);
+      }
+      if (target === null || Math.abs(target - y) < 4) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      snapping = true;
+      lenis.scrollTo(target, { duration: 1.4, easing: ease, lock: true, force: true,
+        onComplete: function () { setTimeout(function () { snapping = false; }, 160); } });
+      setTimeout(function () { snapping = false; }, 2200);   // never stay locked
+    };
+    window.addEventListener('wheel', onWheel, { passive: false, capture: true });
+    cleanups.push(function () { window.removeEventListener('wheel', onWheel, { capture: true }); });
+  }
+
+  function stripMotion(strip, trackSel, dur) {
     if (!strip) return;
     strip.classList.add('is-js');
-    var tracks = $$('.circle__track', strip);
-    var tw = G.to(tracks, { xPercent: root.dir === 'rtl' ? 100 : -100, ease: 'none', duration: 46, repeat: -1 });
+    var tracks = $$(trackSel, strip);
+    var tw = G.to(tracks, { xPercent: root.dir === 'rtl' ? 100 : -100, ease: 'none', duration: dur, repeat: -1 });
     var slow = function () { G.to(tw, { timeScale: 0, duration: .7, ease: 'power2.out', overwrite: true }); };
     var go = function () { G.to(tw, { timeScale: 1, duration: .9, ease: 'power2.in', overwrite: true }); };
     strip.addEventListener('pointerenter', slow);
@@ -902,7 +949,7 @@
         var cs = getComputedStyle(el);
         if (cs.visibility === 'hidden' || +cs.opacity < .05) { el.style.opacity = 1; el.style.visibility = 'visible'; el.style.transform = 'none'; }
       });
-      $$('[data-reveal], .co-row', view).forEach(function (el) {
+      $$('[data-reveal]', view).forEach(function (el) {
         var cs = getComputedStyle(el);
         if (el.getBoundingClientRect().top < window.innerHeight && (+cs.opacity < .05 || cs.visibility === 'hidden')) { el.style.opacity = 1; el.style.visibility = 'visible'; el.style.transform = 'none'; }
       });
@@ -1158,6 +1205,8 @@
   if (mqDesk.addEventListener) mqDesk.addEventListener('change', onMq);
 
   /* ---------- boot ---------- */
+  // Each view starts at the top (or at its own anchor); the browser's own restore would desync smooth scrolling.
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   applyChrome();
   initLenis();
   window.addEventListener('hashchange', onRoute);

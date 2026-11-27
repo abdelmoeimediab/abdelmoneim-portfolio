@@ -18,6 +18,7 @@
       try { l = localStorage.getItem('lang') || (navigator.language || '').slice(0, 2); } catch (e) {}
       if (l === 'ar') { d.lang = 'ar'; d.dir = 'rtl'; }
       d.classList.add('js');
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
       try { if (sessionStorage.getItem('introSeen')) d.classList.add('intro-seen'); } catch (e) {}
     })();
   </script>
