@@ -60,64 +60,114 @@ window.SITE = {
     { image: null, nameEn: 'Collaborator 08', nameAr: 'شريك 08', roleEn: 'Marketing Manager', roleAr: 'مدير تسويق' }
   ],
 
-  /* Clients & industries (home) and the full-screen company view (#/client/<id>).
-     logo: path to an SVG/PNG (null shows the name as a wordmark). categories are listed only when the company has them;
-     items are project ids from `projects`. Texts marked PLACEHOLDER are waiting for the owner's copy. */
-  companies: [
-    { id: 'mb-engineering', logo: null, name: 'MB Engineering Group',
-      industryEn: 'Engineering & Industry', industryAr: 'الهندسة والصناعة',
-      aboutEn: 'A multi-subsidiary engineering and industrial group. Its companies sell technical products and services to businesses, so their communication has to make complex offers clear.',
-      aboutAr: 'مجموعة هندسية وصناعية فيها أكتر من شركة تابعة، بتقدّم منتجات وخدمات تقنية للشركات، فتواصلها لازم يخلّي العروض المعقدة واضحة.',
-      roleEn: 'Head of Graphic Design: visual execution across the group’s subsidiaries.', roleAr: 'رئيس قسم التصميم: التنفيذ البصري لكل الشركات التابعة للمجموعة.',
-      categories: [
-        { key: 'social', labelEn: 'Social Media Design', labelAr: 'تصميم السوشيال ميديا', introEn: '', introAr: '', items: [] },
-        { key: 'print', labelEn: 'Print & Advertising', labelAr: 'الطباعة والإعلان', introEn: '', introAr: '', items: [] }
-      ] },
-    { id: 'triora', logo: null, name: 'TRIORA Agency',
-      industryEn: 'Creative & Marketing Agency', industryAr: 'وكالة تسويق وإبداع',
-      aboutEn: 'A creative and marketing agency that builds brands and campaigns for its clients.',
-      aboutAr: 'وكالة إبداع وتسويق بتبني علامات تجارية وحملات لعملائها.',
-      roleEn: 'Multimedia Specialist (part-time): the agency’s own visual identity and motion campaigns.', roleAr: 'أخصائي مالتي ميديا (دوام جزئي): الهوية البصرية للوكالة نفسها وحملات الموشن.',
-      categories: [
-        { key: 'motion', labelEn: 'Motion Graphics', labelAr: 'موشن جرافيك', introEn: '', introAr: '', items: [] },
-        { key: 'social', labelEn: 'Social Media Design', labelAr: 'تصميم السوشيال ميديا', introEn: '', introAr: '', items: [] }
-      ] },
-    { id: 'ag-developers', logo: null, name: 'AG Developers',
-      industryEn: 'Real Estate Development', industryAr: 'التطوير العقاري',
-      aboutEn: 'A real estate developer of residential and investment projects. Its audience decides on large purchases, so every piece has to build trust in the project fast.',
-      aboutAr: 'شركة تطوير عقاري لمشاريع سكنية واستثمارية. جمهورها بياخد قرار شراء كبير، فكل قطعة لازم تبني ثقة في المشروع بسرعة.',
-      roleEn: 'Video editing and motion graphics for launch and project reels.', roleAr: 'مونتاج وموشن جرافيك لريلز الإطلاق والمشاريع.',
-      categories: [
-        { key: 'videos', labelEn: 'Videos', labelAr: 'فيديوهات', introEn: '', introAr: '',
-          items: ['ag-reel-01', 'ag-reel-02', 'ag-reel-03', 'ag-reel-04', 'ag-reel-05', 'ag-reel-06', 'ag-reel-07', 'ag-reel-08', 'ag-reel-09', 'ag-reel-10',
-                  'ag-reel-11', 'ag-reel-12', 'ag-reel-13', 'ag-reel-14', 'ag-reel-15', 'ag-reel-16', 'ag-reel-17', 'ag-reel-18', 'ag-reel-19'] }
-      ] },
-    { id: 'next-home', logo: null, name: 'Next Home',
-      industryEn: '', industryAr: '', aboutEn: '', aboutAr: '', roleEn: '', roleAr: '',   // PLACEHOLDER
-      categories: [
-        { key: 'social', labelEn: 'Social Media Design', labelAr: 'تصميم السوشيال ميديا', introEn: '', introAr: '', items: [] }
-      ] },
-    { id: 'concept', logo: null, name: 'CON.C.E.P.T',
-      industryEn: '', industryAr: '', aboutEn: '', aboutAr: '', roleEn: '', roleAr: '',   // PLACEHOLDER
-      categories: [
-        { key: 'social', labelEn: 'Social Media Design', labelAr: 'تصميم السوشيال ميديا', introEn: '', introAr: '', items: [] }
-      ] },
-    { id: 'waterway', logo: null, name: 'The Waterway',
-      industryEn: '', industryAr: '', aboutEn: '', aboutAr: '', roleEn: '', roleAr: '',   // PLACEHOLDER
-      categories: [
-        { key: 'videos', labelEn: 'Videos', labelAr: 'فيديوهات', introEn: '', introAr: '', items: [] }
-      ] },
-    { id: 'an-marketing', logo: null, name: 'AN Marketing',
-      industryEn: 'Digital Marketing Agency', industryAr: 'وكالة تسويق رقمي',
-      aboutEn: 'A digital marketing agency in New Cairo that plans and runs advertising campaigns for brands.',
-      aboutAr: 'وكالة تسويق رقمي في القاهرة الجديدة بتخطط وتدير حملات إعلانية للعلامات التجارية.',
-      roleEn: 'Multimedia Specialist: reels, motion graphics and ad designs for digital campaigns.', roleAr: 'أخصائي مالتي ميديا: ريلز وموشن جرافيك وتصميمات إعلانية للحملات الرقمية.',
-      categories: [
-        { key: 'videos', labelEn: 'Videos', labelAr: 'فيديوهات', introEn: '', introAr: '', items: [] },
-        { key: 'motion', labelEn: 'Motion Graphics', labelAr: 'موشن جرافيك', introEn: '', introAr: '', items: [] },
-        { key: 'social', labelEn: 'Social Media Design', labelAr: 'تصميم السوشيال ميديا', introEn: '', introAr: '', items: [] }
-      ] }
-  ],
+  /* Clients & industries (home strip) and the full-screen company view (#/client/<id>). Owner-approved copy.
+     logo: full-colour logo on transparency; logoMono: the same in one ink colour (clients strip). null = name as wordmark.
+     nameAr / aboutAr may contain <bdi dir="ltr"> for Latin brand names (HTML allowed).
+     roleEn / roleAr: Abdelmoneim's role for that client ('' shows "To be added").
+     categories: [{ key, labelEn, labelAr, introEn, introAr, items: [project ids from `projects`] }], only what was produced. */
+  companies: (function () {
+    var MB_ROLE_EN = 'Visual design as Head of Graphic Design at MB Engineering Group.';
+    var MB_ROLE_AR = 'التصميم البصري من خلال رئاسة قسم التصميم في مجموعة <bdi dir="ltr">MB Engineering Group</bdi>.';
+    function logo(id) { return { logo: 'assets/logos/' + id + '.webp', logoMono: 'assets/logos/' + id + '-mono.webp' }; }
+    function co(o, l) { if (l) { o.logo = l.logo; o.logoMono = l.logoMono; } else { o.logo = null; o.logoMono = null; } o.categories = o.categories || []; return o; }
+    return [
+      co({ id: 'mb-engineering', nameEn: 'MB Engineering Group', nameAr: 'مجموعة إم بي للهندسة (<bdi dir="ltr">MB Engineering Group</bdi>)',
+        industryEn: 'Engineering, Industrial & Electrical Holding Group', industryAr: 'مجموعة هندسية وصناعية وكهربائية',
+        aboutEn: 'Founded in 1981 and listed on the Egyptian Exchange, MB Engineering Group is a leading Egyptian industrial and engineering group operating across electrical manufacturing, distribution, logistics, and EV charging, serving Egypt and over 20 export markets.',
+        aboutAr: 'مجموعة هندسية وصناعية مصرية رائدة تأسست عام 1981 ومدرجة في البورصة المصرية، تعمل في تصنيع وتوزيع الأنظمة الكهربائية واللوجستيات وشحن السيارات الكهربائية، وتخدم السوق المصري وأكثر من 20 سوقاً تصديرياً.',
+        roleEn: 'Head of Graphic Design: visual execution across the group’s subsidiaries.', roleAr: 'رئيس قسم التصميم: التنفيذ البصري لكل الشركات التابعة للمجموعة.' }, logo('mb-engineering')),
+      co({ id: 'sha7en', nameEn: 'Sha7en EV Solutions', nameAr: 'شاحن لحلول المركبات الكهربائية (<bdi dir="ltr">Sha7en EV Solutions</bdi>)',
+        industryEn: 'EV Charging Infrastructure & E-Mobility', industryAr: 'البنية التحتية لشحن السيارات الكهربائية',
+        aboutEn: 'The electric mobility arm of MB Engineering Group, operating one of Egypt’s largest EV charging networks with 270+ charging points across 14 governorates, alongside charger supply, installation, and digital out-of-home (DOOH) advertising.',
+        aboutAr: 'ذراع التنقل الكهربائي لمجموعة <bdi dir="ltr">MB</bdi> للهندسة، وتدير واحدة من أكبر شبكات شحن السيارات الكهربائية في مصر بأكثر من 270 نقطة شحن في 14 محافظة، بجانب توريد وتركيب الشواحن وإعلانات الشاشات الرقمية.',
+        roleEn: MB_ROLE_EN, roleAr: MB_ROLE_AR }, logo('sha7en')),
+      co({ id: 'mb-logistics', nameEn: 'MB Logistics', nameAr: 'إم بي للخدمات اللوجستية (<bdi dir="ltr">MB Logistics</bdi>)',
+        industryEn: 'Third-Party Logistics (3PL) & Supply Chain', industryAr: 'الخدمات اللوجستية وسلاسل الإمداد',
+        aboutEn: 'Established in 2017, MB Logistics delivers end-to-end warehousing, order fulfillment, and nationwide distribution across Cairo, the Delta, and Upper Egypt through 3 distribution centers and a 50+ vehicle fleet.',
+        aboutAr: 'تأسست عام 2017 وتقدم حلولاً متكاملة للتخزين وتجهيز الطلبات والتوزيع على مستوى الجمهورية عبر 3 مراكز توزيع وأسطول يزيد عن 50 مركبة لخدمة التجارة الإلكترونية والشركات.',
+        roleEn: MB_ROLE_EN, roleAr: MB_ROLE_AR }, logo('mb-logistics')),
+      co({ id: 'mb-industrial', nameEn: 'MB Industrial (MBI)', nameAr: 'إم بي للصناعة (<bdi dir="ltr">MB Industrial</bdi>)',
+        industryEn: 'Electrical Equipment & Switchgear Manufacturing', industryAr: 'تصنيع المعدات واللوحات الكهربائية',
+        aboutEn: 'The manufacturing arm of MB Engineering Group, producing low-voltage switchgear, distribution boards, enclosures, and EV charging hardware, and serving as Egypt’s exclusive licensed panel builder for France’s Hager.',
+        aboutAr: 'الذراع الصناعي لمجموعة <bdi dir="ltr">MB</bdi> للهندسة، وتتخصص في تصنيع لوحات الجهد المنخفض والمفاتيح الكهربائية وشواحن السيارات الكهربائية، وتُعد المصنّع الحصري المعتمد لشركة <bdi dir="ltr">Hager</bdi> الفرنسية في مصر.',
+        roleEn: MB_ROLE_EN, roleAr: MB_ROLE_AR }, logo('mb-industrial')),
+      co({ id: 'mb-electrical', nameEn: 'MB Electrical Systems', nameAr: 'إم بي للأنظمة الكهربائية (<bdi dir="ltr">MB Electrical Systems</bdi>)',
+        industryEn: 'Electrical Trading & Commercial Distribution', industryAr: 'تجارة وتوزيع الأنظمة الكهربائية',
+        aboutEn: 'The commercial trading and distribution arm of MB Engineering Group, representing global electrical brands in Egypt with over 1,000 certified SKUs serving contractors and commercial projects nationwide.',
+        aboutAr: 'ذراع التجارة والتوزيع بالمجموعة، وتمثل كبرى العلامات الكهربائية العالمية في السوق المصري بكتالوج يتجاوز 1,000 منتج معتمد لخدمة المقاولين والمشروعات التجارية.',
+        roleEn: MB_ROLE_EN, roleAr: MB_ROLE_AR }, logo('mb-electrical')),
+      co({ id: 'beta-electric', nameEn: 'Beta Electric / BETA Cables', nameAr: 'بيتا إلكتريك وكابلات بيتا (<bdi dir="ltr">Beta Electric</bdi>)',
+        industryEn: 'Electrical Cables & Low-Voltage Products', industryAr: 'تصنيع الكابلات والمنتجات الكهربائية',
+        aboutEn: 'MB Engineering Group’s dedicated low-voltage product brand and cable-manufacturing subsidiary producing building wires, power cables, and control cables with a 5,000-ton annual capacity compliant with international IEC and BS standards.',
+        aboutAr: 'العلامة التجارية للمنتجات الكهربائية منخفضة الجهد ومصنع كابلات <bdi dir="ltr">BETA</bdi> التابع للمجموعة، المتخصص في إنتاج أسلاك المباني وكابلات القوى والتحكم بطاقة إنتاجية 5,000 طن سنوياً وفق المعايير الدولية.',
+        roleEn: MB_ROLE_EN, roleAr: MB_ROLE_AR }, logo('beta-electric')),
+      co({ id: 'ag-developers', nameEn: 'AG Developments', nameAr: 'إيه جي للتطوير العقاري (<bdi dir="ltr">AG Developments</bdi>)',
+        industryEn: 'Real Estate Development', industryAr: 'التطوير العقاري',
+        aboutEn: 'An Egyptian real estate developer with over 15 years of market experience, specializing in commercial, administrative, and medical mall developments in El Shorouk City including Castle Mall, Capital Mall, and East Plaza Mall.',
+        aboutAr: 'شركة تطوير عقاري مصرية بخبرة تتجاوز 15 عاماً في السوق، متخصصة في تطوير المولات التجارية والإدارية والطبية في مدينة الشروق ومن أبرز مشروعاتها <bdi dir="ltr">Castle Mall</bdi> و<bdi dir="ltr">Capital Mall</bdi> و<bdi dir="ltr">East Plaza Mall</bdi>.',
+        roleEn: 'Video editing and motion graphics for launch and project reels.', roleAr: 'مونتاج وموشن جرافيك لريلز الإطلاق والمشاريع.',
+        categories: [
+          { key: 'videos', labelEn: 'Videos', labelAr: 'فيديوهات', introEn: '', introAr: '',
+            items: ['ag-reel-01', 'ag-reel-02', 'ag-reel-03', 'ag-reel-04', 'ag-reel-05', 'ag-reel-06', 'ag-reel-07', 'ag-reel-08', 'ag-reel-09', 'ag-reel-10',
+                    'ag-reel-11', 'ag-reel-12', 'ag-reel-13', 'ag-reel-14', 'ag-reel-15', 'ag-reel-16', 'ag-reel-17', 'ag-reel-18', 'ag-reel-19'] }
+        ] }, logo('ag-developers')),
+      co({ id: 'owl-properties', nameEn: 'OWL Properties', nameAr: 'أول بروبرتيز (<bdi dir="ltr">OWL Properties</bdi>)',
+        industryEn: 'Real Estate Brokerage & Consultancy', industryAr: 'التسويق والاستشارات العقارية',
+        aboutEn: 'A New Cairo-based real estate brokerage and advisory platform helping buyers compare projects, compounds, and payment plans across New Cairo, North Coast, Ain Sokhna, New Capital, and Sheikh Zayed.',
+        aboutAr: 'شركة استشارات وتسويق عقاري في القاهرة الجديدة تساعد العملاء على مقارنة المشروعات والكمبوندات وخطط السداد في القاهرة الجديدة والساحل الشمالي والعين السخنة والعاصمة الإدارية والشيخ زايد.',
+        roleEn: '', roleAr: '' }, logo('owl-properties')),
+      co({ id: 'sky-city', nameEn: 'Sky City El Galala', nameAr: 'سكاي سيتي الجلالة (<bdi dir="ltr">Sky City El Galala</bdi>)',
+        industryEn: 'Mountain Tourism Resort & Real Estate', industryAr: 'منتجع سياحي وتطوير عقاري',
+        aboutEn: 'An integrated 282-acre mountain-top residential and tourism resort by Pyramids Developments on the Galala Plateau in Ain Sokhna, situated 750 meters above sea level with panoramic Red Sea views, lagoons, and terraced architecture.',
+        aboutAr: 'منتجع سياحي وسكني متكامل على مساحة 282 فداناً من تطوير <bdi dir="ltr">Pyramids Developments</bdi> على هضبة الجلالة بالعين السخنة بارتفاع 750 متراً فوق سطح البحر بإطلالات بانورامية على البحر الأحمر وبحيرات صناعية ومصاطب متدرجة.',
+        roleEn: '', roleAr: '' }, logo('sky-city')),
+      co({ id: 'whwm', short: 'WHWM', nameEn: 'World Hotel World Management (WHWM)', nameAr: 'وورلد هوتيل وورلد مانجمنت (<bdi dir="ltr">WHWM</bdi>)',
+        industryEn: 'Hospitality & Facility Management', industryAr: 'إدارة الفنادق والضيافة والمنشآت',
+        aboutEn: 'A French-Egyptian hospitality and facility management company based at Grand Square Mall in Cairo, specializing in operating and managing hotels, resorts, commercial buildings, and residential destinations to French hospitality standards.',
+        aboutAr: 'شركة مصرية فرنسية لإدارة الفنادق والمنشآت مقرها <bdi dir="ltr">Grand Square Mall</bdi>، متخصصة في تشغيل وإدارة الفنادق والمنتجعات والمباني التجارية والسكنية وفق معايير الضيافة الفرنسية.',
+        roleEn: '', roleAr: '' }),
+      co({ id: 'essec-solar', nameEn: 'ESSEC Solar Engineering', nameAr: 'إيسيك للطاقة الشمسية (<bdi dir="ltr">ESSEC Solar</bdi>)',
+        industryEn: 'Renewable Energy & Solar Engineering', industryAr: 'الطاقة المتجددة وهندسة الطاقة الشمسية',
+        aboutEn: 'An Egyptian solar energy engineering firm delivering end-to-end design, installation, and maintenance for grid-tied and off-grid solar plants, solar irrigation pumps, solar water heating, desalination, and backup UPS systems.',
+        aboutAr: 'شركة مصرية متخصصة في هندسة وحلول الطاقة الشمسية، تقدم خدمات التصميم والتركيب والصيانة لمحطات الطاقة الشمسية وطلمبات الري بالطاقة الشمسية وسخانات المياه الشمسية وأنظمة التحلية والطاقة الاحتياطية.',
+        roleEn: '', roleAr: '' }),
+      co({ id: 'rentex', nameEn: 'Rentex', nameAr: 'رنتكس لتأجير السيارات (<bdi dir="ltr">Rentex</bdi>)',
+        industryEn: 'Car Rental & Corporate Fleet Services', industryAr: 'تأجير السيارات وخدمات الأساطيل',
+        aboutEn: 'Founded in 2015 in 6th of October City, Rentex is an Egyptian car rental company providing daily, monthly, and corporate vehicle rentals with or without a driver across Greater Cairo and Giza branches.',
+        aboutAr: 'شركة مصرية لتأجير السيارات تأسست عام 2015 في 6 أكتوبر، تقدم خدمات التأجير اليومي والشهري وتأجير أساطيل الشركات بسائق أو بدون عبر فروعها في القاهرة الكبرى والجيزة.',
+        roleEn: '', roleAr: '' }),
+      co({ id: 'an-marketing', nameEn: 'AN Marketing Agency', nameAr: 'إيه إن للتسويق الرقمي (<bdi dir="ltr">AN Marketing Agency</bdi>)',
+        industryEn: 'Digital Marketing & Branding Agency', industryAr: 'وكالة تسويق رقمي وبراندنج',
+        aboutEn: 'A New Cairo-based full-service digital marketing and branding agency founded in 2020, specializing in social media campaigns, brand identity, content production, and strategy across real estate, healthcare, and media sectors.',
+        aboutAr: 'وكالة تسويق رقمي وبراندنج متكاملة تأسست عام 2020 في القاهرة الجديدة، متخصصة في حملات السوشيال ميديا والهوية البصرية وصناعة المحتوى لقطاعات العقارات والرعاية الصحية والإعلام.',
+        roleEn: 'Multimedia Specialist: reels, motion graphics and ad designs for digital campaigns.', roleAr: 'أخصائي مالتي ميديا: ريلز وموشن جرافيك وتصميمات إعلانية للحملات الرقمية.' }),
+      co({ id: 'triora', nameEn: 'Triora Agency', nameAr: 'تريورا إيجنسي (<bdi dir="ltr">Triora Agency</bdi>)',
+        industryEn: 'Creative & Marketing Agency', industryAr: 'وكالة إبداعية وتسويقية',
+        aboutEn: 'A strategy-first creative and marketing agency based in 6th of October City, partnering with brands on social media management, content strategy, video production, brand photography, and graphic design.',
+        aboutAr: 'وكالة إبداعية وتسويقية في مدينة 6 أكتوبر تعتمد منهجية استراتيجية في إدارة السوشيال ميديا وصناعة المحتوى وإنتاج الفيديو والتصوير الإعلاني والتصميم الجرافيكي.',
+        roleEn: 'Multimedia Specialist (part-time): the agency’s own visual identity and motion campaigns.', roleAr: 'أخصائي مالتي ميديا (دوام جزئي): الهوية البصرية للوكالة نفسها وحملات الموشن.' }),
+      co({ id: 'kosharista', nameEn: 'Kosharista', nameAr: 'كشريستا (<bdi dir="ltr">Kosharista</bdi>)',
+        industryEn: 'Food & Beverage — Egyptian Restaurant', industryAr: 'مطاعم ومأكولات مصرية',
+        aboutEn: 'A modern Egyptian koshary restaurant located in Champs Elysees Mall in the New Administrative Capital, serving signature koshary portions for dine-in, plaza seating, and delivery.',
+        aboutAr: 'مطعم كشري مصري عصري يقع في مول شانزليزيه بالعاصمة الإدارية الجديدة، يقدم الكشري المصري بأحجام متنوعة مع خدمة الصالة والجلسات الخارجية والتوصيل.',
+        roleEn: '', roleAr: '' }, logo('kosharista')),
+      co({ id: 'lafah-w-lazah', nameEn: 'Lafah w Lazah', nameAr: 'لفة ولذة (<bdi dir="ltr">Lafah w Lazah</bdi>)',
+        industryEn: 'Food & Beverage — Fast-Casual Street Food', industryAr: 'مطاعم ومأكولات سريعة',
+        aboutEn: 'An Egyptian fast-casual restaurant at Champs Elysees Mall in the New Administrative Capital, specializing in freshly pan-cooked spiced meat and signature Egyptian street-food sandwiches.',
+        aboutAr: 'مطعم مأكولات سريعة مصرية في مول شانزليزيه بالعاصمة الإدارية الجديدة، متخصص في الساندوتشات المصرية الطازجة والمطبوخة على الجريل بخلطات وصوصات مميزة.',
+        roleEn: '', roleAr: '' }),
+      co({ id: 'planet-of-skills', nameEn: 'Planet of Skills', nameAr: 'كوكب المهارات (<bdi dir="ltr">Planet of Skills</bdi>)',
+        industryEn: 'Kids’ Education & Animated Digital Media', industryAr: 'تعليم الأطفال والإعلام الرقمي التفاعلي',
+        aboutEn: 'An Egyptian kids’ educational media brand producing short-form animated podcast episodes and visual explainers that teach children life skills, social awareness, healthy habits, and science concepts in Arabic and English.',
+        aboutAr: 'علامة إعلامية تعليمية مصرية للأطفال تنتج حلقات بودكاست قصيرة وفيديوهات أنيميشن تفاعلية لتنمية المهارات الحياتية والاجتماعية وتبسيط المفاهيم العلمية للأطفال بالعربية والإنجليزية.',
+        roleEn: '', roleAr: '' }),
+      co({ id: 'maghawry', nameEn: 'Dr. Mohamed Maghawry', nameAr: 'د. محمد مغاوري',
+        industryEn: 'Public Figure — Islamic Vocalist & Content Creator', industryAr: 'شخصية عامة — منشد أزهري وصانع محتوى',
+        aboutEn: 'A prominent Egyptian Al-Azhar-affiliated Islamic vocalist (Munshid), Quran reciter, and dentist with a combined audience exceeding 600K+ followers on Facebook and 140K+ subscribers on YouTube, known for nasheeds and cultural anthems.',
+        aboutAr: 'منشد أزهري ومبتهل وقارئ للقرآن الكريم وطبيب أسنان مصري شهير، يتابعه أكثر من 600 ألف متابع على فيسبوك و144 ألف مشترك على يوتيوب، ويشتهر بالأناشيد الدينية والمناسبات الرمضانية والجامعية.',
+        roleEn: 'Visual identity, social design, YouTube thumbnails and AI-assisted video.', roleAr: 'الهوية البصرية وتصميمات السوشيال وصور يوتيوب المصغّرة وفيديو بمساعدة الذكاء الاصطناعي.' })
+    ];
+  })(),
 
   // Projects shown in the curved carousel at the top of the Work page (ids from `projects`).
   featured: ['social-01', 'ag-reel-01', 'social-02', 'ag-reel-05', 'social-03', 'ag-reel-09', 'social-04', 'ag-reel-14'],

@@ -82,7 +82,7 @@
   function transition(r) {
     if (busy) { show(r); enter(r); return; }
     busy = true;
-    curtainLabel.textContent = r.name === 'client' ? companyById(r.param).name : r.name === 'home' ? ui().nav.home : ui().nav[r.name];
+    curtainLabel.textContent = r.name === 'client' ? coName(companyById(r.param)) : r.name === 'home' ? ui().nav.home : ui().nav[r.name];
     G.timeline({ onComplete: function () { busy = false; } })
       .set(curtain, { y: 0, yPercent: 100 })
       .fromTo(curtainLabel, { yPercent: 60, autoAlpha: 0 }, { yPercent: 0, autoAlpha: 1, duration: .7, ease: 'expo.out' }, .25)
@@ -176,10 +176,20 @@
       '</div>';
   }
 
-  // Clients & industries: one row per company (logo / wordmark, industry, role). Each row opens the company page.
-  function companyMark(c, cls) {
-    return '<span class="' + cls + '" data-mark="' + esc(c.id) + '">' +
-      (c.logo ? '<img src="' + esc(c.logo) + '" alt="' + esc(c.name) + '">' : brand(c.name)) + '</span>';
+  // Company names: plain text for labels, and the wordmark shown when there is no logo yet.
+  function coName(c) {
+    if (lang === 'ar') return c.nameAr.replace(/<[^>]+>/g, '').replace(/\s*\(.*\)\s*$/, '');
+    return c.nameEn;
+  }
+  // The company mark: in the strip, the one-colour logo with its full-colour version stacked for hover;
+  // on the company page, the full-colour logo. Without a logo, the name set as a wordmark.
+  function companyMark(c, cls, strip) {
+    var inner;
+    if (c.logo && strip) inner = '<img class="logo-mono" src="' + esc(c.logoMono || c.logo) + '" alt="' + esc(coName(c)) + '"><img class="logo-color" src="' + esc(c.logo) + '" alt="" aria-hidden="true">';
+    else if (c.logo) inner = '<img src="' + esc(c.logo) + '" alt="' + esc(coName(c)) + '">';
+    else if (strip && c.short) inner = brand(c.short);   // long names use their short form in the strip only
+    else inner = lang === 'ar' ? esc(coName(c)) : esc(c.nameEn);
+    return '<span class="' + cls + (c.logo ? ' has-logo' : '') + '" data-mark="' + esc(c.id) + '">' + inner + '</span>';
   }
   // Clients: an auto-scrolling strip of logos (wordmarks until the logos arrive), each one opens its company page.
   function clientsShowcase() {
@@ -187,8 +197,8 @@
     var items = function (copy) {
       return (S.companies || []).map(function (c) {
         var ind = L(c, 'industry');
-        return '<li><button type="button" class="co-chip" data-company="' + esc(c.id) + '" data-cursor="' + esc(t.open) + '" aria-label="' + esc(c.name) + '"' + (copy ? ' tabindex="-1"' : '') + '>' +
-            companyMark(c, 'co-chip__mark') +
+        return '<li><button type="button" class="co-chip" data-company="' + esc(c.id) + '" data-cursor="' + esc(t.open) + '" aria-label="' + esc(coName(c)) + '"' + (copy ? ' tabindex="-1"' : '') + '>' +
+            companyMark(c, 'co-chip__mark', true) +
             '<span class="co-chip__ind' + (ind ? '' : ' is-pending') + '">' + esc(ind || t.pending) + '</span>' +
           '</button></li>';
       }).join('');
@@ -239,17 +249,18 @@
         '<div class="company__profile">' +
           '<h2 class="company__h" data-rise>' + esc(t.aboutCompany) + '</h2>' +
           '<div class="company__about" data-rise>' +
-            '<p class="' + (about ? '' : 'is-pending') + '">' + esc(about || t.pending) + '</p>' +
+            // about / role are owner copy from content.js and may contain <bdi> for brand names
+            '<p class="' + (about ? '' : 'is-pending') + '">' + (about || esc(t.pending)) + '</p>' +
             '<dl class="info">' +
               '<div class="info__row"><dt>' + esc(t.industry) + '</dt><dd class="' + (ind ? '' : 'is-pending') + '">' + esc(ind || t.pending) + '</dd></div>' +
-              '<div class="info__row"><dt>' + esc(t.myRole) + '</dt><dd class="' + (role ? '' : 'is-pending') + '">' + esc(role || t.pending) + '</dd></div>' +
+              '<div class="info__row"><dt>' + esc(t.myRole) + '</dt><dd class="' + (role ? '' : 'is-pending') + '">' + (role || esc(t.pending)) + '</dd></div>' +
             '</dl>' +
           '</div>' +
         '</div>' +
         (cats.length ? '<div class="company__work">' +
           '<div class="filters company__tabs" role="tablist" data-rise>' + tabs + '<span class="filters__bar" aria-hidden="true"></span></div>' +
           '<div id="companyCat"></div>' +
-        '</div>' : '') +
+        '</div>' : '<p class="company__empty" data-rise>' + esc(t.itemsPending) + '</p>') +
       '</section>';
   }
 
@@ -657,7 +668,7 @@
       } });
     }
     // Both strips (clients, Creative Circle) run on their own and ease to a stop on hover.
-    stripMotion($('#coStrip'), '.co-track', 40);
+    stripMotion($('#coStrip'), '.co-track', 80);
     circleMotion();
     sectionSnap();
 
