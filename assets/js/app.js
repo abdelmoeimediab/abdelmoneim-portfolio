@@ -38,8 +38,9 @@
   function sig(s) { return esc(s).replace(/\{([^}]+)\}/g, '<em class="sig">$1</em>'); }
   var STAR = '<svg class="star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C12.9 7.6 16.4 11.1 24 12 16.4 12.9 12.9 16.4 12 24 11.1 16.4 7.6 12.9 0 12 7.6 11.1 11.1 7.6 12 0Z"/></svg>';
   function brand(name) { return lang === 'ar' ? '<bdi dir="ltr">' + esc(name) + '</bdi>' : esc(name); }
-  function clientById(id) { for (var i = 0; i < S.clients.length; i++) if (S.clients[i].id === id) return S.clients[i]; return null; }
-  function clientName(c) { if (!c) return esc(ui().independent); return lang === 'ar' && c.ar ? esc(c.ar) : brand(c.name); }
+  // A project's client is one of `companies` (by id); projects without one are independent work.
+  function clientById(id) { return id ? companyById(id) : null; }
+  function clientName(c) { if (!c) return esc(ui().independent); return lang === 'ar' ? esc(coName(c)) : esc(c.nameEn); }
   function rc(ratio) { return 'r-' + String(ratio).replace(':', 'x'); }
   function ratioHtml(r) { return '<bdi dir="ltr">' + esc(r) + '</bdi>'; }
   function $(sel, ctx) { return (ctx || document).querySelector(sel); }
@@ -128,11 +129,6 @@
         v = esc(d.v) + ' <bdi dir="ltr" class="info__clock js-clock">--:--</bdi>';
       } else v = esc(d.v);
       return '<div class="info__row" data-reveal><dt>' + esc(d.k) + '</dt><dd>' + v + '</dd></div>';
-    }).join('');
-    var logos = S.clients.map(function (cl) {
-      var label = clientName(cl);
-      var inner = cl.logo ? '<img src="' + esc(cl.logo) + '" alt="' + esc(lang === 'ar' && cl.ar ? cl.ar : cl.name) + '">' : label;
-      return '<li class="logo-slot" data-client="' + esc(cl.id) + '">' + inner + '</li>';
     }).join('');
     var nameWords = p.heroNameSig.split(' ').map(function (w) { return '<span class="hero__word"><span data-split>' + sig(w) + '</span></span>'; }).join(' ');
     var socials = c.socials.slice(0, 2).map(function (s) { return '<a class="u" href="' + esc(s.url) + '" target="_blank" rel="noopener">' + brand(s.name) + '</a>'; }).join(lang === 'ar' ? '، ' : ', ');

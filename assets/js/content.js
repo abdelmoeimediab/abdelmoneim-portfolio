@@ -41,11 +41,6 @@ window.SITE = {
     }
   },
 
-  // Placeholder numbers until the owner confirms them.
-  stats: [
-    { value: 12, suffix: '', en: 'clients and brands', ar: 'عميل وعلامة تجارية' },
-    { value: 4, suffix: '+', en: 'years of experience', ar: 'سنين خبرة' }
-  ],
 
   /* Creative Circle (home): people Abdelmoneim works with. Display only, no links.
      PLACEHOLDERS: replace image (e.g. 'assets/circle/name.webp', square), names and roles. */
@@ -183,19 +178,6 @@ window.SITE = {
     { type: 'count', value: 250, suffix: 'K+', en: { k: 'Frames rendered', v: '' }, ar: { k: 'فريمات اتعملت', v: '' } }
   ],
 
-  // logo: path to an SVG/PNG later (e.g. 'assets/logos/mb.svg'). Until then the name is shown as a wordmark.
-  // ar: Arabic name for entities that are not Latin brands; otherwise the Latin name is used in <bdi>.
-  clients: [
-    { id: 'mb-engineering', name: 'MB Engineering Group', logo: null },
-    { id: 'ministry', name: 'Ministry of Investment', ar: 'وزارة الاستثمار', logo: null },
-    { id: 'triora', name: 'TRIORA', logo: null },
-    { id: 'an-marketing', name: 'AN Marketing', logo: null },
-    { id: 'ag-developers', name: 'AG Developers', logo: null },
-    { id: 'next-home', name: 'Next Home', logo: null },
-    { id: 'concept', name: 'CON.C.E.P.T', logo: null },
-    { id: 'waterway', name: 'The Waterway', logo: null },
-    { id: 'maghawry', name: 'Dr. Mohamed Maghawry Media', ar: 'د. محمد مغاوري للإنتاج الإعلامي', logo: null }
-  ],
 
   categories: [
     { id: 'social', ratio: '4:5', en: { name: 'Social Media Design', desc: 'Campaign posts, typographic pieces and series built for the feed.' }, ar: { name: 'تصميم السوشيال ميديا', desc: 'بوستات حملات وتايبوجرافي وسلاسل معمولة للفيد.' } },

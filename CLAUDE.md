@@ -5,7 +5,11 @@ Read this first, then `docs/design-brief.md` (the owner's full design brief) and
 ## Who and what
 - Owner: Abdelmoneim Ashraf Diab, graphic designer / motion designer. He writes Arabic (Egyptian dialect) and English; reply in the language he uses.
 - Goal: rebuild the portfolio from scratch (Phase 1: static front-end only; Phase 2: admin/CMS later).
-- Current state (2026-11-27): the old design and its admin dashboard were removed. The Phase 1 redesign (direction "the frame": stone background, teal `#00AA83` accent, a frame that morphs 9:16 → 4:5 → 16:9) lives in `index.html` + `assets/`. Content is in `assets/js/content.js`. It is a trial the owner will iterate on; numbers (12 clients, 4+ years) and logos are placeholders.
+- Current state (2026-11-28): Phase 1 front-end in `index.html` + `assets/`; all content in `assets/js/content.js`.
+  - Home: teal hero with the cut-out portrait drawn by `assets/js/portrait-gl.js` (WebGL; print-halftone on pointer and during the scroll glide into About; the owner rejected any effect that warps the face), name masthead with italic-serif signature letters, About with info list, clients strip (18 clients, 10 logos in `assets/logos/` as colour + mono), Creative Circle strip (placeholders), footer. Mouse-wheel section snapping on Home.
+  - Company pages at `#/client/<id>` (logo FLIP morph from the strip). Work page with giant WORK and a curved carousel. Full-screen menu. EN/AR. Dark mode (device setting + header toggle). Above 1600px everything scales in vw.
+  - Owner workflow: show changes locally first; push/deploy only when the owner says "طبّق".
+  - Placeholders still waiting for the owner: Creative Circle people, 8 client logos, roles for 8 clients, per-company deliverables and category stories, services/availability/fun-fact lines.
 
 ## Infrastructure (verified 2026-11-22)
 - GitHub: `abdelmoeimediab/abdelmoneim-portfolio`, default branch `main`. Pushes to any branch get a Vercel preview; `main` is production.
