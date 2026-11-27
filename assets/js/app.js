@@ -26,6 +26,8 @@
   var busy = false;
   var cleanups = [];
   var workTriggers = [];
+  var pendingMorph = null;     // { clone, rect } while a client logo flies into its company page
+  var returnTo = null;         // section id to land on when returning to home
   var lenis = null;
   var fontsReady = !document.fonts || document.fonts.status === 'loaded';
 
@@ -44,6 +46,8 @@
   function $$(sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); }
   function catById(id) { for (var i = 0; i < S.categories.length; i++) if (S.categories[i].id === id) return S.categories[i]; return null; }
   function projectsIn(id) { return S.projects.filter(function (p) { return p.category === id; }); }
+  function companyById(id) { var c = S.companies || []; for (var i = 0; i < c.length; i++) if (c[i].id === id) return c[i]; return null; }
+  function L(o, k) { return o[k + (lang === 'ar' ? 'Ar' : 'En')]; }   // bilingual field: L(company, 'about')
   function projectById(id) { for (var i = 0; i < S.projects.length; i++) if (S.projects[i].id === id) return S.projects[i]; return null; }
   function countLabel(n) {
     if (lang === 'ar') return n + ' ' + (n >= 3 && n <= 10 ? 'مشاريع' : 'مشروع');
@@ -57,26 +61,28 @@
   function parse() {
     var h = (location.hash || '').replace(/^#\/?/, '').split('/');
     var name = h[0] || 'home';
-    if (['home', 'work', 'experience', 'contact'].indexOf(name) === -1) name = 'home';
-    var param = name === 'work' && h[1] && catById(h[1]) ? h[1] : null;
+    if (['home', 'work', 'experience', 'contact', 'client'].indexOf(name) === -1) name = 'home';
+    if (name === 'client' && !(h[1] && companyById(h[1]))) name = 'home';
+    var param = name === 'work' && h[1] && catById(h[1]) ? h[1] : name === 'client' ? h[1] : null;
     return { name: name, param: param };
   }
 
   function onRoute() {
     if (!viewer.hidden) closeViewer(true);
+    if (menuOpen) closeMenu(true);
     var r = parse();
-    if (current && r.name === current.name) {
-      if (r.name === 'work' && r.param !== current.param) { current = r; updateWork(true); }
-      return;
-    }
-    if (!current || !motion) { show(r); enter(r); return; }
+    if (current && r.name === current.name && r.param === current.param) return;
+    if (current && r.name === 'work' && current.name === 'work') { current = r; updateWork(true); return; }
+    if (!current || !motion) { pendingMorph = cleanMorph(); show(r); enter(r); return; }
+    if (r.name === 'client' && pendingMorph) { morphToCompany(r); return; }
+    pendingMorph = cleanMorph();
     transition(r);
   }
 
   function transition(r) {
     if (busy) { show(r); enter(r); return; }
     busy = true;
-    curtainLabel.textContent = r.name === 'home' ? ui().nav.home : ui().nav[r.name];
+    curtainLabel.textContent = r.name === 'client' ? companyById(r.param).name : r.name === 'home' ? ui().nav.home : ui().nav[r.name];
     G.timeline({ onComplete: function () { busy = false; } })
       .set(curtain, { y: 0, yPercent: 100 })
       .fromTo(curtainLabel, { yPercent: 60, autoAlpha: 0 }, { yPercent: 0, autoAlpha: 1, duration: .7, ease: 'expo.out' }, .25)
@@ -90,10 +96,21 @@
   function show(r) {
     runCleanups();
     current = r;
-    var html = r.name === 'work' ? workView() : r.name === 'experience' ? experienceView() : r.name === 'contact' ? contactView() : homeView();
+    var html = r.name === 'work' ? workView() : r.name === 'experience' ? experienceView() : r.name === 'contact' ? contactView()
+      : r.name === 'client' ? companyView(companyById(r.param)) : homeView();
     view.innerHTML = html;
     window.scrollTo(0, 0);
     if (lenis) lenis.scrollTo(0, { immediate: true, force: true });
+    // Coming back from a company page: land on the clients list, not the top.
+    if (r.name === 'home' && returnTo) {
+      var anchor = $('#' + returnTo);
+      returnTo = null;
+      if (anchor) {
+        var y = anchor.getBoundingClientRect().top + window.scrollY - 40;
+        window.scrollTo(0, y);
+        if (lenis) lenis.scrollTo(y, { immediate: true, force: true });
+      }
+    }
     header.classList.remove('is-hidden');
     setNav();
     setHeaderTone(0);
@@ -153,12 +170,181 @@
               '<dl class="info">' + info + '</dl>' +
             '</div>' +
           '</div>' +
-          '<div class="clients" aria-label="' + esc(t.clientsLabel) + '">' +
-            '<p class="clients__label">' + esc(t.clientsLabel) + '</p>' +
-            '<div class="marquee"><ul class="marquee__track">' + logos + '</ul><ul class="marquee__track" aria-hidden="true">' + logos + '</ul></div>' +
-          '</div>' +
         '</section>' +
+        clientsShowcase() +
+        circleStrip() +
       '</div>';
+  }
+
+  // Clients & industries: one row per company (logo / wordmark, industry, role). Each row opens the company page.
+  function companyMark(c, cls) {
+    return '<span class="' + cls + '" data-mark="' + esc(c.id) + '">' +
+      (c.logo ? '<img src="' + esc(c.logo) + '" alt="' + esc(c.name) + '">' : brand(c.name)) + '</span>';
+  }
+  function clientsShowcase() {
+    var t = ui();
+    var rows = (S.companies || []).map(function (c) {
+      var ind = L(c, 'industry') || t.pending;
+      return '<button type="button" class="co-row" data-company="' + esc(c.id) + '" data-cursor="' + esc(t.open) + '" aria-label="' + esc(c.name) + '">' +
+          companyMark(c, 'co-row__mark') +
+          '<span class="co-row__ind' + (L(c, 'industry') ? '' : ' is-pending') + '">' + esc(ind) + '</span>' +
+          '<span class="co-row__go" aria-hidden="true">' + STAR + '</span>' +
+        '</button>';
+    }).join('');
+    return '' +
+      '<section class="clients-show" id="clients" aria-labelledby="clientsTitle">' +
+        '<div class="clients-show__head">' +
+          '<h2 class="clients-show__title" id="clientsTitle" data-reveal>' + esc(t.clientsTitle) + '</h2>' +
+          '<p class="clients-show__intro" data-reveal>' + esc(t.clientsIntro) + '</p>' +
+        '</div>' +
+        '<div class="co-list">' + rows + '</div>' +
+      '</section>';
+  }
+
+  // Creative Circle: an auto-scrolling strip of collaborators (display only).
+  function circleStrip() {
+    var t = ui();
+    var people = (S.circle || []).map(function (p, i) {
+      var name = lang === 'ar' ? p.nameAr : p.nameEn, role = lang === 'ar' ? p.roleAr : p.roleEn;
+      return '<li class="peer" data-peer="' + i + '">' +
+          '<span class="peer__av"><span class="peer__photo" data-peer-photo="' + i + '"></span><span class="peer__ht" data-peer-ht="' + i + '"></span></span>' +
+          '<span class="peer__name">' + esc(name) + '</span><span class="peer__role">' + esc(role) + '</span>' +
+        '</li>';
+    }).join('');
+    return '' +
+      '<section class="circle" id="circle" aria-labelledby="circleTitle">' +
+        '<h2 class="circle__title" id="circleTitle" data-reveal>' + sig(t.circleTitle) + '</h2>' +
+        '<div class="circle__strip" id="circleStrip"><ul class="circle__track">' + people + '</ul><ul class="circle__track" aria-hidden="true">' + people + '</ul></div>' +
+      '</section>';
+  }
+
+  /* ---------- company page ---------- */
+  function companyView(c) {
+    var t = ui();
+    var about = L(c, 'about'), role = L(c, 'role'), ind = L(c, 'industry');
+    var cats = c.categories || [];
+    var tabs = cats.map(function (k, i) {
+      var n = (k.items || []).length;
+      return '<button type="button" data-tab="' + i + '">' + esc(L(k, 'label')) + (n ? '<sup>' + n + '</sup>' : '') + '</button>';
+    }).join('');
+    return '' +
+      '<section class="company" data-company-page="' + esc(c.id) + '">' +
+        '<div class="company__bar">' +
+          '<a class="u company__back" href="#/" id="companyBack">' + esc(t.back) + '</a>' +
+          '<span class="company__tag' + (ind ? '' : ' is-pending') + '">' + STAR + esc(ind || t.pending) + '</span>' +
+        '</div>' +
+        '<h1 class="company__head">' + companyMark(c, 'company__mark') + '</h1>' +
+        '<div class="company__profile">' +
+          '<h2 class="company__h" data-rise>' + esc(t.aboutCompany) + '</h2>' +
+          '<div class="company__about" data-rise>' +
+            '<p class="' + (about ? '' : 'is-pending') + '">' + esc(about || t.pending) + '</p>' +
+            '<dl class="info">' +
+              '<div class="info__row"><dt>' + esc(t.industry) + '</dt><dd class="' + (ind ? '' : 'is-pending') + '">' + esc(ind || t.pending) + '</dd></div>' +
+              '<div class="info__row"><dt>' + esc(t.myRole) + '</dt><dd class="' + (role ? '' : 'is-pending') + '">' + esc(role || t.pending) + '</dd></div>' +
+            '</dl>' +
+          '</div>' +
+        '</div>' +
+        (cats.length ? '<div class="company__work">' +
+          '<div class="filters company__tabs" role="tablist" data-rise>' + tabs + '<span class="filters__bar" aria-hidden="true"></span></div>' +
+          '<div id="companyCat"></div>' +
+        '</div>' : '') +
+      '</section>';
+  }
+
+  function companyCategoryHtml(c, k) {
+    var t = ui(), items = (k.items || []).map(projectById).filter(Boolean), intro = L(k, 'intro');
+    var ratio = items.length ? items[0].ratio : (k.key === 'videos' ? '9:16' : k.key === 'social' ? '4:5' : '16:9');
+    var body = items.length ? items.map(itemHtml).join('') : (function () {
+      var g = '', n = ratio === '16:9' ? 2 : 3;
+      for (var i = 0; i < n; i++) g += '<div class="item item--ghost" aria-hidden="true"><div class="item__media ' + rc(ratio) + '"></div></div>';
+      return g + '<p class="empty-note">' + esc(t.itemsPending) + '</p>';
+    })();
+    return '' +
+      '<div class="company__cat">' +
+        '<div class="company__intro">' +
+          '<h3 class="company__cat-title">' + esc(L(k, 'label')) + '</h3>' +
+          '<p class="' + (intro ? '' : 'is-pending') + '">' + esc(intro || t.storyPending) + '</p>' +
+        '</div>' +
+        '<div class="grid grid--' + ratio.replace(':', 'x') + '">' + body + '</div>' +
+      '</div>';
+  }
+
+  function bindCompany() {
+    var c = companyById(current.param), box = $('#companyCat');
+    var back = $('#companyBack');
+    if (back) back.addEventListener('click', function () { returnTo = 'clients'; });
+    if (!box || !c) return;
+    var tabs = $$('.company__tabs button');
+    var select = function (i, animate) {
+      tabs.forEach(function (b, j) { b.setAttribute('aria-pressed', String(i === j)); b.setAttribute('aria-selected', String(i === j)); });
+      var paint = function () {
+        workTriggers.splice(0).forEach(function (st) { st.kill(); });
+        box.innerHTML = companyCategoryHtml(c, c.categories[i]);
+        bindItems(box);
+        revealItems(box);
+        moveBar(animate);
+        if (ST) ST.refresh();
+      };
+      if (animate && motion) G.to(box, { autoAlpha: 0, y: 14, duration: .25, ease: 'power2.in', onComplete: function () {
+        paint(); G.fromTo(box, { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: .5, ease: 'power3.out', clearProps: 'all' });
+      } });
+      else paint();
+    };
+    var moveBar = function (animate) {
+      var on = $('.company__tabs button[aria-pressed="true"]'), bar = $('.company__tabs .filters__bar');
+      if (!on || !bar) return;
+      var v = { x: on.offsetLeft, y: on.offsetTop + on.offsetHeight - 2, width: on.offsetWidth };
+      if (G && motion && animate) G.to(bar, Object.assign({ duration: .6, ease: 'expo.out' }, v)); else if (G) G.set(bar, v);
+    };
+    tabs.forEach(function (b, i) { b.setAttribute('role', 'tab'); b.addEventListener('click', function () { if (b.getAttribute('aria-pressed') !== 'true') select(i, true); }); });
+    select(0, false);
+    var onR = function () { moveBar(false); };
+    window.addEventListener('resize', onR);
+    cleanups.push(function () { window.removeEventListener('resize', onR); });
+  }
+
+  /* ---------- logo morph: home row -> company header ---------- */
+  function cleanMorph() {
+    if (pendingMorph && pendingMorph.clone.parentNode) pendingMorph.clone.parentNode.removeChild(pendingMorph.clone);
+    return null;
+  }
+
+  function startMorph(row) {
+    var mark = row.querySelector('.co-row__mark');
+    if (!mark || !motion) return;
+    var r = mark.getBoundingClientRect(), cs = getComputedStyle(mark);
+    var clone = mark.cloneNode(true);
+    clone.className = 'co-fly';
+    clone.style.cssText = 'position:fixed;left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px;' +
+      'font-size:' + cs.fontSize + ';line-height:' + cs.lineHeight + ';font-family:' + cs.fontFamily + ';font-weight:' + cs.fontWeight + ';letter-spacing:' + cs.letterSpacing + ';';
+    document.body.appendChild(clone);
+    mark.style.visibility = 'hidden';
+    pendingMorph = { clone: clone, rect: r };
+  }
+
+  function morphToCompany(r) {
+    var m = pendingMorph;
+    busy = true;
+    G.timeline()
+      .to(view, { autoAlpha: 0, duration: .35, ease: 'power2.in' })
+      .to('#foot', { autoAlpha: 0, duration: .35, ease: 'power2.in' }, 0)
+      .add(function () {
+        show(r);
+        var target = $('.company__mark', view);
+        target.style.visibility = 'hidden';
+        G.set(view, { autoAlpha: 1 });
+        G.set('#foot', { autoAlpha: 1 });
+        var tr = target.getBoundingClientRect(), from = m.rect;
+        var s = tr.width / from.width;
+        G.set(m.clone, { transformOrigin: root.dir === 'rtl' ? '100% 0%' : '0% 0%' });
+        var dx = root.dir === 'rtl' ? (tr.right - from.right) : (tr.left - from.left);
+        G.to(m.clone, { x: dx, y: tr.top - from.top, scale: s, duration: 1, ease: 'expo.inOut', onComplete: function () {
+          target.style.visibility = '';
+          pendingMorph = cleanMorph();
+          busy = false;
+        } });
+        enter(r);
+      });
   }
 
   function workView() {
@@ -326,7 +512,17 @@
       });
     });
     if (current.name === 'work') { bindWork(); if (motion) workMotion(); updateWork(false); }
-    if (current.name === 'home') bindHome();
+    if (current.name === 'home') {
+      bindHome();
+      buildPeers();
+      $$('.co-row', view).forEach(function (row) {
+        row.addEventListener('click', function () {
+          startMorph(row);
+          location.hash = '#/client/' + row.getAttribute('data-company');
+        });
+      });
+    }
+    if (current.name === 'client') bindCompany();
     bindMagnetic(view);
     bindCursorTargets(view);
   }
@@ -456,7 +652,10 @@
         });
       } });
     }
-    G.from('.clients', { yPercent: 30, autoAlpha: 0, duration: 1.1, ease: 'expo.out', clearProps: 'all', scrollTrigger: { trigger: '.clients', start: 'top 94%', once: true } });
+    // Clients list rows arrive in sequence; the Creative Circle strip runs on its own.
+    var rows = $$('.co-row', view);
+    if (rows.length) G.from(rows, { y: 34, autoAlpha: 0, duration: 1, ease: 'expo.out', stagger: .07, clearProps: 'all', scrollTrigger: { trigger: '.co-list', start: 'top 88%', once: true } });
+    circleMotion();
 
     // Cursor depth: the portrait tilts a few degrees and drifts slightly; the name drifts the other way.
     if (fine && hero) {
@@ -513,6 +712,77 @@
       G.set(plate, { clearProps: 'clipPath' });
     });
     return p;
+  }
+
+  /* ---------- Creative Circle ---------- */
+  // Each avatar gets two images drawn once: the photo (or a placeholder) and its print-halftone version,
+  // the same language as the hero portrait. Hover scales the circle a little and wipes the halftone in.
+  function halftoneFrom(src, size, cell, ink) {
+    var data = src.getContext('2d').getImageData(0, 0, size, size).data;
+    var out = document.createElement('canvas');
+    out.width = out.height = size;
+    var o = out.getContext('2d');
+    o.fillStyle = ink;
+    var a = Math.PI / 4, cs = Math.cos(a), sn = Math.sin(a), R = size;
+    for (var gy = -R; gy < R; gy += cell) {
+      for (var gx = -R; gx < R; gx += cell) {
+        var cx = gx + cell / 2, cy = gy + cell / 2;
+        var x = cx * cs - cy * sn + size / 2, y = cx * sn + cy * cs + size / 2;
+        if (x < 0 || y < 0 || x >= size || y >= size) continue;
+        var i = ((y | 0) * size + (x | 0)) * 4, al = data[i + 3] / 255;
+        if (al < .05) continue;
+        var lum = (.299 * data[i] + .587 * data[i + 1] + .114 * data[i + 2]) / 255;
+        var r = Math.sqrt(1 - lum) * cell * .72 * al;
+        if (r < .35) continue;
+        o.beginPath(); o.arc(x, y, r, 0, Math.PI * 2); o.fill();
+      }
+    }
+    return out.toDataURL('image/png');
+  }
+
+  function buildPeers() {
+    var SIZE = 240;
+    (S.circle || []).forEach(function (p, idx) {
+      var paint = function (img) {
+        var c = document.createElement('canvas');
+        c.width = c.height = SIZE;
+        var g = c.getContext('2d');
+        if (img) {
+          var s = Math.max(SIZE / img.naturalWidth, SIZE / img.naturalHeight);
+          var w = img.naturalWidth * s, h = img.naturalHeight * s;
+          g.drawImage(img, (SIZE - w) / 2, (SIZE - h) / 2, w, h);
+        } else {
+          // Placeholder: a stone disc with the entry number, until the real photo arrives.
+          g.fillStyle = '#CBC7BA'; g.fillRect(0, 0, SIZE, SIZE);
+          g.fillStyle = '#565C57'; g.font = '400 104px Gloock, serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(String(idx + 1).padStart(2, '0'), SIZE / 2, SIZE / 2 + 6);
+        }
+        var photo = c.toDataURL('image/png'), ht = halftoneFrom(c, SIZE, 7, '#1C2320');
+        $$('[data-peer-photo="' + idx + '"]', view).forEach(function (el) { el.style.backgroundImage = 'url(' + photo + ')'; });
+        $$('[data-peer-ht="' + idx + '"]', view).forEach(function (el) { el.style.backgroundImage = 'url(' + ht + ')'; });
+      };
+      if (p.image) {
+        var img = new Image();
+        img.onload = function () { paint(img); };
+        img.onerror = function () { paint(null); };
+        img.src = p.image;
+      } else if (document.fonts) document.fonts.load('104px Gloock').then(function () { paint(null); }, function () { paint(null); });
+      else paint(null);
+    });
+  }
+
+  // The strip scrolls on its own; hovering it eases the speed down to a stop, leaving eases it back up.
+  function circleMotion() {
+    var strip = $('#circleStrip');
+    if (!strip) return;
+    strip.classList.add('is-js');
+    var tracks = $$('.circle__track', strip);
+    var tw = G.to(tracks, { xPercent: root.dir === 'rtl' ? 100 : -100, ease: 'none', duration: 46, repeat: -1 });
+    var slow = function () { G.to(tw, { timeScale: 0, duration: .7, ease: 'power2.out', overwrite: true }); };
+    var go = function () { G.to(tw, { timeScale: 1, duration: .9, ease: 'power2.in', overwrite: true }); };
+    strip.addEventListener('pointerenter', slow);
+    strip.addEventListener('pointerleave', go);
+    cleanups.push(function () { tw.kill(); });
   }
 
   function linesMotion(tl) {
@@ -632,7 +902,7 @@
         var cs = getComputedStyle(el);
         if (cs.visibility === 'hidden' || +cs.opacity < .05) { el.style.opacity = 1; el.style.visibility = 'visible'; el.style.transform = 'none'; }
       });
-      $$('[data-reveal], .clients', view).forEach(function (el) {
+      $$('[data-reveal], .co-row', view).forEach(function (el) {
         var cs = getComputedStyle(el);
         if (el.getBoundingClientRect().top < window.innerHeight && (+cs.opacity < .05 || cs.visibility === 'hidden')) { el.style.opacity = 1; el.style.visibility = 'visible'; el.style.transform = 'none'; }
       });

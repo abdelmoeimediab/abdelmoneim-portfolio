@@ -47,6 +47,78 @@ window.SITE = {
     { value: 4, suffix: '+', en: 'years of experience', ar: 'سنين خبرة' }
   ],
 
+  /* Creative Circle (home): people Abdelmoneim works with. Display only, no links.
+     PLACEHOLDERS: replace image (e.g. 'assets/circle/name.webp', square), names and roles. */
+  circle: [
+    { image: null, nameEn: 'Collaborator 01', nameAr: 'شريك 01', roleEn: 'Art Director', roleAr: 'مدير فني' },
+    { image: null, nameEn: 'Collaborator 02', nameAr: 'شريك 02', roleEn: 'Graphic Designer', roleAr: 'مصمم جرافيك' },
+    { image: null, nameEn: 'Collaborator 03', nameAr: 'شريك 03', roleEn: 'Motion Designer', roleAr: 'مصمم موشن' },
+    { image: null, nameEn: 'Collaborator 04', nameAr: 'شريك 04', roleEn: 'Social Media Specialist', roleAr: 'أخصائي سوشيال ميديا' },
+    { image: null, nameEn: 'Collaborator 05', nameAr: 'شريك 05', roleEn: 'Copywriter', roleAr: 'كاتب محتوى' },
+    { image: null, nameEn: 'Collaborator 06', nameAr: 'شريك 06', roleEn: 'Video Editor', roleAr: 'مونتير' },
+    { image: null, nameEn: 'Collaborator 07', nameAr: 'شريك 07', roleEn: 'Photographer', roleAr: 'مصور' },
+    { image: null, nameEn: 'Collaborator 08', nameAr: 'شريك 08', roleEn: 'Marketing Manager', roleAr: 'مدير تسويق' }
+  ],
+
+  /* Clients & industries (home) and the full-screen company view (#/client/<id>).
+     logo: path to an SVG/PNG (null shows the name as a wordmark). categories are listed only when the company has them;
+     items are project ids from `projects`. Texts marked PLACEHOLDER are waiting for the owner's copy. */
+  companies: [
+    { id: 'mb-engineering', logo: null, name: 'MB Engineering Group',
+      industryEn: 'Engineering & Industry', industryAr: 'الهندسة والصناعة',
+      aboutEn: 'A multi-subsidiary engineering and industrial group. Its companies sell technical products and services to businesses, so their communication has to make complex offers clear.',
+      aboutAr: 'مجموعة هندسية وصناعية فيها أكتر من شركة تابعة، بتقدّم منتجات وخدمات تقنية للشركات، فتواصلها لازم يخلّي العروض المعقدة واضحة.',
+      roleEn: 'Head of Graphic Design: visual execution across the group’s subsidiaries.', roleAr: 'رئيس قسم التصميم: التنفيذ البصري لكل الشركات التابعة للمجموعة.',
+      categories: [
+        { key: 'social', labelEn: 'Social Media Design', labelAr: 'تصميم السوشيال ميديا', introEn: '', introAr: '', items: [] },
+        { key: 'print', labelEn: 'Print & Advertising', labelAr: 'الطباعة والإعلان', introEn: '', introAr: '', items: [] }
+      ] },
+    { id: 'triora', logo: null, name: 'TRIORA Agency',
+      industryEn: 'Creative & Marketing Agency', industryAr: 'وكالة تسويق وإبداع',
+      aboutEn: 'A creative and marketing agency that builds brands and campaigns for its clients.',
+      aboutAr: 'وكالة إبداع وتسويق بتبني علامات تجارية وحملات لعملائها.',
+      roleEn: 'Multimedia Specialist (part-time): the agency’s own visual identity and motion campaigns.', roleAr: 'أخصائي مالتي ميديا (دوام جزئي): الهوية البصرية للوكالة نفسها وحملات الموشن.',
+      categories: [
+        { key: 'motion', labelEn: 'Motion Graphics', labelAr: 'موشن جرافيك', introEn: '', introAr: '', items: [] },
+        { key: 'social', labelEn: 'Social Media Design', labelAr: 'تصميم السوشيال ميديا', introEn: '', introAr: '', items: [] }
+      ] },
+    { id: 'ag-developers', logo: null, name: 'AG Developers',
+      industryEn: 'Real Estate Development', industryAr: 'التطوير العقاري',
+      aboutEn: 'A real estate developer of residential and investment projects. Its audience decides on large purchases, so every piece has to build trust in the project fast.',
+      aboutAr: 'شركة تطوير عقاري لمشاريع سكنية واستثمارية. جمهورها بياخد قرار شراء كبير، فكل قطعة لازم تبني ثقة في المشروع بسرعة.',
+      roleEn: 'Video editing and motion graphics for launch and project reels.', roleAr: 'مونتاج وموشن جرافيك لريلز الإطلاق والمشاريع.',
+      categories: [
+        { key: 'videos', labelEn: 'Videos', labelAr: 'فيديوهات', introEn: '', introAr: '',
+          items: ['ag-reel-01', 'ag-reel-02', 'ag-reel-03', 'ag-reel-04', 'ag-reel-05', 'ag-reel-06', 'ag-reel-07', 'ag-reel-08', 'ag-reel-09', 'ag-reel-10',
+                  'ag-reel-11', 'ag-reel-12', 'ag-reel-13', 'ag-reel-14', 'ag-reel-15', 'ag-reel-16', 'ag-reel-17', 'ag-reel-18', 'ag-reel-19'] }
+      ] },
+    { id: 'next-home', logo: null, name: 'Next Home',
+      industryEn: '', industryAr: '', aboutEn: '', aboutAr: '', roleEn: '', roleAr: '',   // PLACEHOLDER
+      categories: [
+        { key: 'social', labelEn: 'Social Media Design', labelAr: 'تصميم السوشيال ميديا', introEn: '', introAr: '', items: [] }
+      ] },
+    { id: 'concept', logo: null, name: 'CON.C.E.P.T',
+      industryEn: '', industryAr: '', aboutEn: '', aboutAr: '', roleEn: '', roleAr: '',   // PLACEHOLDER
+      categories: [
+        { key: 'social', labelEn: 'Social Media Design', labelAr: 'تصميم السوشيال ميديا', introEn: '', introAr: '', items: [] }
+      ] },
+    { id: 'waterway', logo: null, name: 'The Waterway',
+      industryEn: '', industryAr: '', aboutEn: '', aboutAr: '', roleEn: '', roleAr: '',   // PLACEHOLDER
+      categories: [
+        { key: 'videos', labelEn: 'Videos', labelAr: 'فيديوهات', introEn: '', introAr: '', items: [] }
+      ] },
+    { id: 'an-marketing', logo: null, name: 'AN Marketing',
+      industryEn: 'Digital Marketing Agency', industryAr: 'وكالة تسويق رقمي',
+      aboutEn: 'A digital marketing agency in New Cairo that plans and runs advertising campaigns for brands.',
+      aboutAr: 'وكالة تسويق رقمي في القاهرة الجديدة بتخطط وتدير حملات إعلانية للعلامات التجارية.',
+      roleEn: 'Multimedia Specialist: reels, motion graphics and ad designs for digital campaigns.', roleAr: 'أخصائي مالتي ميديا: ريلز وموشن جرافيك وتصميمات إعلانية للحملات الرقمية.',
+      categories: [
+        { key: 'videos', labelEn: 'Videos', labelAr: 'فيديوهات', introEn: '', introAr: '', items: [] },
+        { key: 'motion', labelEn: 'Motion Graphics', labelAr: 'موشن جرافيك', introEn: '', introAr: '', items: [] },
+        { key: 'social', labelEn: 'Social Media Design', labelAr: 'تصميم السوشيال ميديا', introEn: '', introAr: '', items: [] }
+      ] }
+  ],
+
   // Projects shown in the curved carousel at the top of the Work page (ids from `projects`).
   featured: ['social-01', 'ag-reel-01', 'social-02', 'ag-reel-05', 'social-03', 'ag-reel-09', 'social-04', 'ag-reel-14'],
 
@@ -175,6 +247,18 @@ window.SITE = {
       selected: 'Selected pieces',
       footName: 'ABDEL M{O}NEIM ASHR{A}F',
       rights: 'All rights reserved.',
+      circleTitle: 'CREATIVE C{I}RCLE',
+      clientsTitle: 'Clients & industries',
+      clientsIntro: 'The companies I have worked with, and the industries they work in. Open one to see what I made for it.',
+      open: 'Open',
+      back: '← Back to Home',
+      aboutCompany: 'About the company',
+      industry: 'Industry',
+      myRole: 'My role',
+      pending: 'To be added',
+      storyPending: 'The story behind this work is being written: the challenge, why it was made, and how it was produced with the team.',
+      itemsPending: 'Work for this category is being prepared.',
+      producedFor: 'Produced for',
       workTitle: 'Work',
       workIntro: 'Five kinds of work, each shown in the format it was made for.',
       all: 'All',
@@ -220,6 +304,18 @@ window.SITE = {
       selected: 'مختارات',
       footName: 'عبد {المنعم} أشرف',
       rights: 'كل الحقوق محفوظة.',
+      circleTitle: 'شركــاء الإبــداع',
+      clientsTitle: 'العملاء والمجالات',
+      clientsIntro: 'الشركات اللي اشتغلت معاها، والمجالات اللي بتشتغل فيها. افتح أي شركة وشوف عملت لها إيه.',
+      open: 'افتح',
+      back: 'العودة للرئيسية →',
+      aboutCompany: 'عن الشركة',
+      industry: 'المجال',
+      myRole: 'دوري',
+      pending: 'هيتضاف قريب',
+      storyPending: 'قصة الشغل ده بتتكتب: التحدي، وليه اتعمل، وإزاي اتنفّذ مع الفريق.',
+      itemsPending: 'شغل القسم ده بيتجهّز.',
+      producedFor: 'اتعمل لـ',
       workTitle: 'الأعمال',
       workIntro: 'خمس أنواع من الشغل، كل نوع معروض بالمقاس اللي اتعمل له.',
       all: 'الكل',
