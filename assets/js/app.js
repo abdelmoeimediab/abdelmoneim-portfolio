@@ -25,12 +25,16 @@
   var current = null;          // current route { name, param }
   var busy = false;
   var cleanups = [];
+  var workTriggers = [];
   var lenis = null;
   var fontsReady = !document.fonts || document.fonts.status === 'loaded';
 
   /* ---------- helpers ---------- */
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function ui() { return S.ui[lang]; }
+  // Typographic signature: {X} in content strings becomes the italic-serif letter (or the coloured word in Arabic).
+  function sig(s) { return esc(s).replace(/\{([^}]+)\}/g, '<em class="sig">$1</em>'); }
+  var STAR = '<svg class="star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C12.9 7.6 16.4 11.1 24 12 16.4 12.9 12.9 16.4 12 24 11.1 16.4 7.6 12.9 0 12 7.6 11.1 11.1 7.6 12 0Z"/></svg>';
   function brand(name) { return lang === 'ar' ? '<bdi dir="ltr">' + esc(name) + '</bdi>' : esc(name); }
   function clientById(id) { for (var i = 0; i < S.clients.length; i++) if (S.clients[i].id === id) return S.clients[i]; return null; }
   function clientName(c) { if (!c) return esc(ui().independent); return lang === 'ar' && c.ar ? esc(c.ar) : brand(c.name); }
@@ -99,20 +103,27 @@
   /* ---------- views ---------- */
   function homeView() {
     var p = S.person[lang], t = ui(), c = S.contact;
-    var stats = S.stats.map(function (s) {
-      return '<div class="stat"><span class="stat__num"><bdi dir="ltr" data-count="' + s.value + '" data-suffix="' + esc(s.suffix) + '">' + s.value + esc(s.suffix) + '</bdi></span><span class="stat__label">' + esc(s[lang]) + '</span></div>';
+    var info = S.info.map(function (row) {
+      var d = row[lang], v;
+      if (row.type === 'count') {
+        v = '<span class="info__num"><bdi dir="ltr" data-count="' + row.value + '" data-suffix="' + esc(row.suffix) + '">' + row.value + esc(row.suffix) + '</bdi></span>' + (d.v ? ' ' + esc(d.v) : '');
+      } else if (row.type === 'clock') {
+        v = esc(d.v) + ' <bdi dir="ltr" class="info__clock js-clock">--:--</bdi>';
+      } else v = esc(d.v);
+      return '<div class="info__row" data-reveal><dt>' + esc(d.k) + '</dt><dd>' + v + '</dd></div>';
     }).join('');
     var logos = S.clients.map(function (cl) {
       var label = clientName(cl);
       var inner = cl.logo ? '<img src="' + esc(cl.logo) + '" alt="' + esc(lang === 'ar' && cl.ar ? cl.ar : cl.name) + '">' : label;
       return '<li class="logo-slot" data-client="' + esc(cl.id) + '">' + inner + '</li>';
     }).join('');
-    var nameWords = p.heroName.split(' ').map(function (w) { return '<span class="hero__word"><span data-split>' + esc(w) + '</span></span>'; }).join(' ');
+    var nameWords = p.heroNameSig.split(' ').map(function (w) { return '<span class="hero__word"><span data-split>' + sig(w) + '</span></span>'; }).join(' ');
     var socials = c.socials.slice(0, 2).map(function (s) { return '<a class="u" href="' + esc(s.url) + '" target="_blank" rel="noopener">' + brand(s.name) + '</a>'; }).join(lang === 'ar' ? '، ' : ', ');
     var portrait = '<img src="assets/portrait/portrait.webp" srcset="assets/portrait/portrait-640.webp 640w, assets/portrait/portrait.webp 925w" sizes="(max-width: 900px) 90vw, 46vw" width="925" height="1351" alt="' + esc(p.portraitAlt) + '" decoding="async">';
     return '' +
       '<div class="home" id="home">' +
         '<section class="hero" id="hero">' +
+          '<div class="hero__labels" data-rise><span>' + esc(t.hello) + '</span>' + STAR + '<span>' + esc(t.edition) + '</span></div>' +
           '<h1 class="hero__name" id="heroName" aria-label="' + esc(p.heroName) + '">' + nameWords + '</h1>' +
           '<div class="hero__copy">' +
             '<p class="hero__tagline" data-lines>' + esc(p.tagline) + '</p>' +
@@ -138,8 +149,8 @@
             '</div>' +
             '<div class="about__body">' +
               '<h2 class="about__title" id="aboutTitle" data-reveal>' + esc(t.aboutTitle) + '</h2>' +
-              '<div class="about__copy">' + p.about.map(function (x) { return '<p data-reveal>' + x + '</p>'; }).join('') + '</div>' +
-              '<div class="stats" data-reveal>' + stats + '</div>' +
+              '<div class="about__copy">' + p.about.map(function (x, i) { return i === 0 ? '<p class="about__lead" data-fill>' + x + '</p>' : '<p data-reveal>' + x + '</p>'; }).join('') + '</div>' +
+              '<dl class="info">' + info + '</dl>' +
             '</div>' +
           '</div>' +
           '<div class="clients" aria-label="' + esc(t.clientsLabel) + '">' +
@@ -156,15 +167,33 @@
       S.categories.map(function (c) {
         return '<button type="button" data-filter="' + c.id + '">' + esc(c[lang].name) + '<sup>' + projectsIn(c.id).length + '</sup></button>';
       }).join('');
+    var reel = (S.featured || []).map(projectById).filter(Boolean).map(function (p) {
+      var isVideo = p.type === 'video';
+      return '<button type="button" class="reel__card" data-project="' + esc(p.id) + '" data-cursor="' + esc(isVideo ? t.play : t.view) + '">' +
+          '<span class="reel__media ' + rc(p.ratio) + '"><img src="' + esc(posterFor(p)) + '" alt="" loading="lazy" decoding="async">' +
+          (isVideo ? '<span class="item__play" aria-hidden="true"></span>' : '') + '</span>' +
+          '<span class="reel__cap"><span>' + esc(p[lang].title) + '</span><span>' + clientName(clientById(p.client)) + '</span></span>' +
+        '</button>';
+    }).join('');
+    var n = (S.featured || []).length;
     return '' +
-      '<section class="page work">' +
-        '<div class="work-head">' +
-          '<div><h1 class="page-title"><span class="line-mask"><span data-split>' + esc(t.workTitle) + '</span></span></h1>' +
-          '<p class="page-intro" data-rise>' + esc(t.workIntro) + '</p></div>' +
+      '<section class="work">' +
+        '<div class="work-top">' +
+          '<h1 class="work-giant" id="workGiant" aria-label="' + esc(t.workTitle) + '"><span class="work-giant__in"><span data-split>' + sig(t.workGiant) + '</span></span></h1>' +
+          '<p class="page-intro" data-rise>' + esc(t.workIntro) + '</p>' +
         '</div>' +
+        (n ? '<section class="reel" id="reel" aria-label="' + esc(t.selected) + '">' +
+          '<div class="reel__pin">' +
+            '<p class="reel__label">' + esc(t.selected) + '</p>' +
+            '<div class="reel__stage"><div class="reel__track" id="reelTrack" data-lenis-prevent-touch>' + reel + '</div></div>' +
+            '<p class="reel__count" aria-hidden="true"><bdi dir="ltr"><span id="reelIdx">01</span> / ' + String(n).padStart(2, '0') + '</bdi></p>' +
+          '</div>' +
+        '</section>' : '') +
+      '<div class="page work-body">' +
         '<div class="filters" role="group" aria-label="' + esc(t.workTitle) + '" data-rise>' + filters + '<span class="filters__bar" aria-hidden="true"></span></div>' +
         '<div id="workSections"></div>' +
         '<p class="nda">' + esc(t.ndaNote) + '</p>' +
+      '</div>' +
       '</section>';
   }
 
@@ -258,7 +287,7 @@
     var param = current.param;
     var cats = param ? [catById(param)] : S.categories;
     var paint = function () {
-      if (ST) ST.getAll().forEach(function (st) { st.kill(); }); // the work page has no other triggers
+      workTriggers.splice(0).forEach(function (st) { st.kill(); }); // only the grid's own triggers (keep the reel pin)
       cursor.classList.remove('is-label');
       box.innerHTML = cats.map(sectionHtml).join('');
       bindItems(box);
@@ -296,7 +325,7 @@
         if (location.hash !== h) location.hash = h;
       });
     });
-    if (current.name === 'work') updateWork(false);
+    if (current.name === 'work') { bindWork(); if (motion) workMotion(); updateWork(false); }
     if (current.name === 'home') bindHome();
     bindMagnetic(view);
     bindCursorTargets(view);
@@ -352,9 +381,11 @@
 
   /* ---------- home: clock, name fit ---------- */
   function bindHome() {
-    var clock = $('#cairoClock');
+    var clocks = $$('#cairoClock, .js-clock', view);
     var tick = function () {
-      try { clock.textContent = new Date().toLocaleTimeString('en-GB', { timeZone: 'Africa/Cairo', hour12: false }); } catch (e) { clock.textContent = ''; }
+      var now = '';
+      try { now = new Date().toLocaleTimeString('en-GB', { timeZone: 'Africa/Cairo', hour12: false }); } catch (e) {}
+      clocks.forEach(function (c) { c.textContent = c.classList.contains('js-clock') ? now.slice(0, 5) : now; });
     };
     tick();
     var iv = setInterval(tick, 1000);
@@ -405,9 +436,20 @@
     $$('[data-reveal]', view).forEach(function (el) {
       G.from(el, { y: 44, autoAlpha: 0, duration: 1.1, ease: 'expo.out', clearProps: 'all', scrollTrigger: { trigger: el, start: 'top 88%', once: true } });
     });
+    // The lead sentence fills with colour as it scrolls through: grey, then teal at the leading edge, then ink.
+    var lead = $('[data-fill]', view);
+    if (lead && Split) {
+      var ls = new Split(lead, { type: lang === 'en' ? 'words,chars' : 'words' });
+      cleanups.push(function () { ls.revert(); });
+      var units = lang === 'en' ? ls.chars : ls.words;
+      var ftl = G.timeline({ scrollTrigger: { trigger: lead, start: 'top 82%', end: 'bottom 42%', scrub: .5 } });
+      ftl.fromTo(units, { color: '#BDB8AA' }, { color: '#00AA83', stagger: .03, duration: .2, ease: 'none' })
+        .to(units, { color: '#1C2320', stagger: .03, duration: .2, ease: 'none' }, .18);
+    }
+
     var nums = $$('[data-count]', view);
     if (nums.length) {
-      ST.create({ trigger: '.about .stats', start: 'top 90%', once: true, onEnter: function () {
+      ST.create({ trigger: '.info', start: 'top 88%', once: true, onEnter: function () {
         nums.forEach(function (el) {
           var o = { v: 0 }, end = +el.getAttribute('data-count'), suf = el.getAttribute('data-suffix') || '';
           G.to(o, { v: end, duration: 1.8, ease: 'power3.out', onUpdate: function () { el.textContent = Math.round(o.v) + suf; } });
@@ -491,7 +533,7 @@
     if (!medias.length) return;
     G.set(medias, { clipPath: 'inset(100% 0% 0% 0%)' });
     medias.forEach(function (m) { m.setAttribute('data-pending', ''); });
-    ST.batch(medias, {
+    var made = ST.batch(medias, {
       id: 'work', start: 'top 92%', once: true,
       onEnter: function (batch) {
         batch.forEach(function (m) { m.removeAttribute('data-pending'); });
@@ -499,10 +541,74 @@
         G.from(batch.map(function (m) { return m.querySelector('img'); }).filter(Boolean), { scale: 1.25, duration: 1.4, ease: 'expo.out', stagger: .07, clearProps: 'transform' });
       }
     });
+    Array.prototype.push.apply(workTriggers, made);
     $$('.cat__head', box).forEach(function (h) {
-      G.from(h.children, { y: 24, autoAlpha: 0, duration: .9, ease: 'expo.out', stagger: .08, clearProps: 'all',
-        scrollTrigger: { id: 'work', trigger: h, start: 'top 85%', once: true } });
+      var tw = G.from(h.children, { y: 24, autoAlpha: 0, duration: .9, ease: 'expo.out', stagger: .08, clearProps: 'all',
+        scrollTrigger: { trigger: h, start: 'top 85%', once: true } });
+      if (tw.scrollTrigger) workTriggers.push(tw.scrollTrigger);
     });
+  }
+
+  /* ---------- work: giant word + curved carousel ---------- */
+  function fitWide(el, maxH) {
+    if (!el) return;
+    el.style.setProperty('--fit', '100px');
+    var avail = el.parentNode.clientWidth;
+    var natural = el.firstElementChild.offsetWidth;
+    el.style.setProperty('--fit', Math.min(100 * avail / natural * .99, maxH) + 'px');
+  }
+
+  function bindWork() {
+    var giant = $('#workGiant');
+    var fit = function () { fitWide(giant, window.innerHeight * .62); };
+    fit();
+    if (document.fonts) document.fonts.ready.then(function () { fit(); if (ST) ST.refresh(); });
+    window.addEventListener('resize', fit);
+    cleanups.push(function () { window.removeEventListener('resize', fit); });
+    $$('.reel__card', view).forEach(function (el) {
+      el.addEventListener('click', function () { openViewer(el.getAttribute('data-project'), el); });
+    });
+    // Swipe mode (mobile / no motion): keep the counter on the card nearest the centre.
+    var track = $('#reelTrack'), idx = $('#reelIdx');
+    if (track && idx) {
+      track.addEventListener('scroll', function () {
+        var mid = window.innerWidth / 2, best = 0, bestD = 1e9;
+        $$('.reel__card', track).forEach(function (c, i) {
+          var r = c.getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - mid);
+          if (d < bestD) { bestD = d; best = i; }
+        });
+        idx.textContent = String(best + 1).padStart(2, '0');
+      }, { passive: true });
+    }
+  }
+
+  // Desktop: the section pins and vertical scroll moves the cards sideways; each card turns on a cylinder
+  // according to its distance from the centre. Mobile / no motion: a plain swipeable row.
+  function workMotion() {
+    var giant = $('#workGiant');
+    if (giant) G.to(giant, { yPercent: 18, ease: 'none', scrollTrigger: { trigger: '.work-top', start: 'top top', end: 'bottom top', scrub: true } });
+    var reel = $('#reel'), track = $('#reelTrack');
+    if (!reel || !track || !window.matchMedia('(min-width: 901px)').matches) return;
+    reel.classList.add('is-pinned');
+    var cards = $$('.reel__card', track), idx = $('#reelIdx');
+    var rtl = root.dir === 'rtl';
+    var dist = function () { return Math.max(0, track.scrollWidth - track.parentNode.clientWidth); };
+    var bend = function () {
+      var vw = window.innerWidth, mid = vw / 2, best = 0, bestD = 1e9;
+      cards.forEach(function (c, i) {
+        var r = c.getBoundingClientRect(), off = (r.left + r.width / 2 - mid) / vw;
+        var k = Math.max(-1, Math.min(1, off * 1.6));
+        G.set(c, { rotationY: -k * 34, z: -Math.abs(k) * 220, transformOrigin: '50% 50%' });
+        if (Math.abs(off) < bestD) { bestD = Math.abs(off); best = i; }
+      });
+      if (idx) idx.textContent = String(best + 1).padStart(2, '0');
+    };
+    var tw = G.to(track, {
+      x: function () { return rtl ? dist() : -dist(); }, ease: 'none',
+      scrollTrigger: { trigger: reel, start: 'top top', end: function () { return '+=' + dist(); }, pin: true, scrub: .6, invalidateOnRefresh: true, onUpdate: bend, onRefresh: bend }
+    });
+    bend();
+    cleanups.push(function () { tw.kill(); reel.classList.remove('is-pinned'); });
   }
 
   function experienceMotion() {
@@ -594,17 +700,102 @@
 
   /* ---------- header, language ---------- */
   function setNav() {
-    $$('.nav a').forEach(function (a) {
+    $$('.menu__link').forEach(function (a) {
       var r = a.getAttribute('data-route');
       if (current && current.name === r) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
     });
+  }
+
+  /* ---------- full-screen menu ---------- */
+  var menu = document.getElementById('menu'), menuBtn = document.getElementById('menuBtn');
+  var menuOpen = false, menuAnim = null;
+
+  function renderMenu() {
+    var t = ui(), c = S.contact;
+    $('#menuNav').innerHTML = ['home', 'work', 'experience', 'contact'].map(function (r) {
+      var label = sig(t.navSig[r]);
+      return '<a class="menu__link" href="#/' + (r === 'home' ? '' : r) + '" data-route="' + r + '" aria-label="' + esc(t.nav[r]) + '">' +
+        '<span class="menu__roll"><span class="menu__word">' + label + '</span><span class="menu__word" aria-hidden="true">' + label + '</span></span></a>';
+    }).join('');
+    $('#menuFoot').innerHTML =
+      '<a class="u" href="mailto:' + esc(c.email) + '"><bdi dir="ltr">' + esc(c.email) + '</bdi></a>' +
+      '<span class="menu__socials">' + c.socials.slice(0, 3).map(function (s) {
+        return '<a class="u" href="' + esc(s.url) + '" target="_blank" rel="noopener">' + brand(s.name) + '</a>';
+      }).join('') + '</span>';
+    $('#menuBtnLabel').textContent = menuOpen ? t.menuClose : t.menu;
+    $$('.menu__link').forEach(function (a) {
+      a.addEventListener('click', function () { closeMenu(true); });
+    });
+    setNav();
+  }
+
+  function openMenu() {
+    if (menuOpen) return;
+    menuOpen = true;
+    menu.hidden = false;
+    menuBtn.setAttribute('aria-expanded', 'true');
+    $('#menuBtnLabel').textContent = ui().menuClose;
+    root.classList.add('menu-open');
+    header.classList.remove('is-hidden');
+    if (lenis) lenis.stop();
+    if (menuAnim) menuAnim.kill();
+    if (motion) {
+      menuAnim = G.timeline()
+        .fromTo(menu, { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: .75, ease: 'expo.inOut' })
+        .from('.menu__link .menu__roll', { yPercent: 110, duration: .9, stagger: .07, ease: 'expo.out' }, .35)
+        .from('.menu__foot > *', { y: 20, autoAlpha: 0, duration: .6, stagger: .08, ease: 'expo.out', clearProps: 'all' }, .55);
+    }
+    var first = $('.menu__link');
+    if (first) first.focus({ preventScroll: true });
+  }
+
+  function closeMenu(instant) {
+    if (!menuOpen) return;
+    menuOpen = false;
+    menuBtn.setAttribute('aria-expanded', 'false');
+    $('#menuBtnLabel').textContent = ui().menu;
+    var done = function () {
+      menu.hidden = true;
+      root.classList.remove('menu-open');
+      G && G.set(menu, { clearProps: 'clipPath' });
+      if (lenis && viewer.hidden) lenis.start();
+    };
+    if (menuAnim) menuAnim.kill();
+    if (motion && !instant) menuAnim = G.to(menu, { clipPath: 'inset(0% 0% 100% 0%)', duration: .6, ease: 'expo.inOut', onComplete: done });
+    else done();
+    if (!instant) menuBtn.focus();
+  }
+
+  menuBtn.addEventListener('click', function () { if (menuOpen) closeMenu(); else openMenu(); });
+  document.addEventListener('keydown', function (e) { if (menuOpen && e.key === 'Escape') closeMenu(); });
+
+  /* ---------- footer ---------- */
+  function renderFooter() {
+    var t = ui(), c = S.contact, p = S.person[lang];
+    var run = '';
+    for (var i = 0; i < 4; i++) run += '<span class="foot__name">' + sig(t.footName) + '</span>' + STAR;
+    $('#foot').innerHTML =
+      '<div class="foot__top"><span>' + esc(p.name.join(' ')) + '</span>' + STAR + '<span>' + esc(t.edition) + '</span></div>' +
+      '<div class="foot__grid">' +
+        '<div class="foot__col">' +
+          '<p class="foot__k">' + esc(t.phone) + '</p><a class="u" href="' + esc(c.whatsapp) + '" target="_blank" rel="noopener"><bdi dir="ltr">' + esc(c.phone) + '</bdi></a>' +
+          '<p class="foot__k">' + esc(t.email) + '</p><a class="u" href="mailto:' + esc(c.email) + '"><bdi dir="ltr">' + esc(c.email) + '</bdi></a>' +
+        '</div>' +
+        '<div class="foot__col foot__col--end">' +
+          '<p class="foot__k">' + esc(t.elsewhere) + '</p>' +
+          c.socials.map(function (s) { return '<a class="u" href="' + esc(s.url) + '" target="_blank" rel="noopener">' + brand(s.name) + '</a>'; }).join('') +
+        '</div>' +
+      '</div>' +
+      '<div class="foot__marquee" aria-hidden="true"><div class="foot__track">' + run + '</div><div class="foot__track">' + run + '</div></div>' +
+      '<p class="foot__legal"><span>© 2026 ' + esc(p.name.join(' ')) + '</span><span>' + esc(t.rights) + '</span></p>';
   }
 
   function applyChrome() {
     var t = ui(), p = S.person[lang];
     root.lang = lang; root.dir = lang === 'ar' ? 'rtl' : 'ltr';
     document.title = t.title;
-    $$('.nav a').forEach(function (a) { a.textContent = t.nav[a.getAttribute('data-route')]; a.classList.add('u'); });
+    renderMenu();
+    renderFooter();
     $('[data-t="markName"]').textContent = p.name.join(' ');
     $('[data-t="markLab"]').textContent = p.lab;
     $('.mark').setAttribute('aria-label', t.nav.home);

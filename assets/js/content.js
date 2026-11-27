@@ -8,6 +8,8 @@ window.SITE = {
     en: {
       name: ['Abdelmoneim', 'Diab'],            // short form, used in the header
       heroName: 'ABDEL MONEIM ASHRAF',
+      // Typographic signature: letters in {braces} are set in the italic serif.
+      heroNameSig: 'ABDEL M{O}NEIM ASHR{A}F',
       tagline: 'Ideas into visuals. Visuals into impact.',
       title: 'Multimedia & Visual Designer',
       portraitAlt: 'Portrait of Abdel Moneim Ashraf',
@@ -23,6 +25,9 @@ window.SITE = {
     ar: {
       name: ['عبد المنعم', 'دياب'],
       heroName: 'عبد المنعم أشرف',
+      // Arabic letters can't be mixed across typefaces without breaking their joins, so the signature
+      // here is a whole word set in a different colour.
+      heroNameSig: 'عبد {المنعم} أشرف',
       tagline: 'أفكار بتتحول لصورة، وصورة بتسيب أثر.',
       title: 'مصمم مالتي ميديا وتصميم بصري',
       portraitAlt: 'صورة عبد المنعم أشرف',
@@ -40,6 +45,20 @@ window.SITE = {
   stats: [
     { value: 12, suffix: '', en: 'clients and brands', ar: 'عميل وعلامة تجارية' },
     { value: 4, suffix: '+', en: 'years of experience', ar: 'سنين خبرة' }
+  ],
+
+  // Projects shown in the curved carousel at the top of the Work page (ids from `projects`).
+  featured: ['social-01', 'ag-reel-01', 'social-02', 'ag-reel-05', 'social-03', 'ag-reel-09', 'social-04', 'ag-reel-14'],
+
+  /* About info list (home). type: 'text' | 'count' (animated number) | 'clock' (live Cairo time).
+     PLACEHOLDERS to confirm with the owner: services wording, availability, and the fun fact. */
+  info: [
+    { type: 'text', en: { k: 'Services', v: 'Graphic design, motion graphics, video and AI production' }, ar: { k: 'الخدمات', v: 'تصميم جرافيك، موشن جرافيك، فيديو وإنتاج بالذكاء الاصطناعي' } },
+    { type: 'count', value: 4, suffix: '+', en: { k: 'Experience', v: 'years' }, ar: { k: 'الخبرة', v: 'سنين' } },
+    { type: 'count', value: 12, suffix: '', en: { k: 'Clients', v: 'brands and companies' }, ar: { k: 'العملاء', v: 'علامة وشركة' } },
+    { type: 'clock', en: { k: 'Based in', v: 'Cairo, Egypt' }, ar: { k: 'مقيم في', v: 'القاهرة، مصر' } },
+    { type: 'text', en: { k: 'Availability', v: 'Open for new projects' }, ar: { k: 'التوفر', v: 'متاح لمشاريع جديدة' } },
+    { type: 'count', value: 250, suffix: 'K+', en: { k: 'Frames rendered', v: '' }, ar: { k: 'فريمات اتعملت', v: '' } }
   ],
 
   // logo: path to an SVG/PNG later (e.g. 'assets/logos/mb.svg'). Until then the name is shown as a wordmark.
@@ -147,6 +166,15 @@ window.SITE = {
       city: 'Cairo',
       available: 'Available for new projects',
       scroll: 'Scroll',
+      hello: 'Hi there',
+      edition: 'Portfolio 2026',
+      menu: 'Menu',
+      menuClose: 'Close',
+      navSig: { home: 'H{O}ME', work: 'W{O}RK', experience: 'EXPER{I}ENCE', contact: 'C{O}NTACT' },
+      workGiant: 'W{O}RK',
+      selected: 'Selected pieces',
+      footName: 'ABDEL M{O}NEIM ASHR{A}F',
+      rights: 'All rights reserved.',
       workTitle: 'Work',
       workIntro: 'Five kinds of work, each shown in the format it was made for.',
       all: 'All',
@@ -183,6 +211,15 @@ window.SITE = {
       city: 'القاهرة',
       available: 'متاح لمشاريع جديدة',
       scroll: 'انزل',
+      hello: 'أهلًا',
+      edition: 'بورتفوليو 2026',
+      menu: 'القائمة',
+      menuClose: 'إغلاق',
+      navSig: { home: 'الرئيسية', work: 'الأعمال', experience: 'الخبرات', contact: 'تواصل' },
+      workGiant: 'الأعمال',
+      selected: 'مختارات',
+      footName: 'عبد {المنعم} أشرف',
+      rights: 'كل الحقوق محفوظة.',
       workTitle: 'الأعمال',
       workIntro: 'خمس أنواع من الشغل، كل نوع معروض بالمقاس اللي اتعمل له.',
       all: 'الكل',

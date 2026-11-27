@@ -9,7 +9,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='9' y='3' width='14' height='26' fill='%2300AA83'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300..700&family=Gloock&family=Schibsted+Grotesk:wght@400..700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300..700&family=Gloock&family=Instrument+Serif:ital@1&family=Schibsted+Grotesk:wght@400..700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/main.css">
   <script>
     // Restore the visitor's language before first paint, and mark JS as available.
@@ -39,18 +39,25 @@
       <span class="mark__glyph" aria-hidden="true"></span>
       <span class="mark__text"><span class="mark__name" data-t="markName"></span><span class="mark__lab" data-t="markLab"></span></span>
     </a>
-    <nav class="nav" aria-label="Main">
-      <a href="#/work" data-link data-route="work"></a>
-      <a href="#/experience" data-link data-route="experience"></a>
-      <a href="#/contact" data-link data-route="contact"></a>
-    </nav>
     <div class="lang" role="group" id="lang">
       <button type="button" data-lang="en" lang="en">EN</button>
       <button type="button" data-lang="ar" lang="ar">AR</button>
     </div>
+    <button type="button" class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="menu">
+      <span class="menu-btn__icon" aria-hidden="true"><i></i><i></i></span>
+      <span class="menu-btn__label" id="menuBtnLabel"></span>
+    </button>
   </header>
 
+  <!-- Full-screen menu -->
+  <div class="menu" id="menu" hidden>
+    <nav class="menu__nav" id="menuNav" aria-label="Main"></nav>
+    <div class="menu__foot" id="menuFoot"></div>
+  </div>
+
   <main id="view" tabindex="-1"></main>
+
+  <footer class="foot" id="foot"></footer>
 
   <!-- Project viewer -->
   <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-labelledby="viewerTitle" hidden>
