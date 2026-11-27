@@ -389,8 +389,12 @@
     var glp = setupGL();
     var hero = $('#hero');
 
-    // Entrance: the portrait emerges bottom-up behind an organic edge (WebGL), or rises in (fallback).
-    if (glp) tl.to(glp.state, { reveal: 1, duration: 2.2, ease: 'power2.out' }, .1);
+    // Entrance: the portrait appears bottom-up as halftone dots, then resolves into the photo (WebGL);
+    // the fallback simply rises in.
+    if (glp) {
+      tl.to(glp.state, { reveal: 1, duration: 1.8, ease: 'power2.out' }, .1);
+      tl.to(glp.state, { halftone: 0, duration: 1.3, ease: 'power2.inOut' }, 1.4);
+    }
     else tl.from('#heroImg', { yPercent: 14, autoAlpha: 0, duration: 1.8, ease: 'expo.out' }, 0);
 
     // Leaving the hero: the name drifts up, the copy lifts away.
@@ -412,24 +416,28 @@
     }
     G.from('.clients', { yPercent: 30, autoAlpha: 0, duration: 1.1, ease: 'expo.out', clearProps: 'all', scrollTrigger: { trigger: '.clients', start: 'top 94%', once: true } });
 
-    // Cursor depth: the portrait and the name drift in opposite directions.
+    // Cursor depth: the portrait tilts a few degrees and drifts slightly; the name drifts the other way.
     if (fine && hero) {
       var target = glp ? glp.state : $('#heroImg');
       var kx = glp ? 'offsetX' : 'x', ky = glp ? 'offsetY' : 'y';
       var fx = G.quickTo(target, kx, { duration: 1.1, ease: 'power3.out' }), fy = G.quickTo(target, ky, { duration: 1.1, ease: 'power3.out' });
+      var tx = glp ? G.quickTo(glp.state, 'tiltX', { duration: 1.2, ease: 'power3.out' }) : function () {};
+      var ty = glp ? G.quickTo(glp.state, 'tiltY', { duration: 1.2, ease: 'power3.out' }) : function () {};
       var nx = G.quickTo('#heroName', 'x', { duration: 1.3, ease: 'power3.out' });
       var move = function (e) {
         var dx = e.clientX / window.innerWidth - .5, dy = e.clientY / window.innerHeight - .5;
-        fx(dx * 26); fy(dy * 14); nx(dx * -24);
+        fx(dx * 14); fy(dy * 8); nx(dx * -24);
+        ty(dx * .09); tx(-dy * .06);   // about 5° and 3.5° at the edges
       };
-      var leave = function () { fx(0); fy(0); nx(0); };
+      var leave = function () { fx(0); fy(0); nx(0); tx(0); ty(0); };
       hero.addEventListener('pointermove', move);
       hero.addEventListener('pointerleave', leave);
     }
   }
 
-  /* The portrait is drawn by PortraitGL on a fixed canvas: it ripples under the pointer or a finger, and as you
-     scroll it travels from the hero into the About frame, turning fluid and bowing with scroll speed on the way. */
+  /* The portrait is drawn by PortraitGL on a fixed canvas without ever being warped: the pointer or a finger
+     turns what it passes into print halftone, and on scroll it glides into the About frame, going halftone on
+     the way and resolving back to the photo on arrival. */
   function setupGL() {
     if (!window.PortraitGL) return null;
     var heroImg = $('#heroImg'), slot = $('#aboutSlot'), plate = $('#aboutPlate');
@@ -437,7 +445,7 @@
     var p = window.PortraitGL.create({ src: 'assets/portrait/portrait.webp', from: heroImg, to: slot });
     if (!p) return null;
     document.body.appendChild(p.canvas);
-    var tick = function () { p.state.velocity *= .9; p.render(); };
+    var tick = function () { p.render(); };
     var failed = false;
     p.onReady = function () { if (!failed) { root.classList.add('is-gl'); G.ticker.add(tick); } };
     p.onError = function () { failed = true; root.classList.remove('is-gl'); };
@@ -445,13 +453,14 @@
       trigger: '#hero', start: 'top top', endTrigger: plate, end: 'center 58%',
       onUpdate: function (self) {
         G.to(p.state, { progress: self.progress, duration: .8, ease: 'power3.out', overwrite: 'auto' });
-        p.state.velocity = self.getVelocity();
       }
     });
     var plateTween = G.fromTo(plate, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ease: 'power2.out',
       scrollTrigger: { trigger: plate, start: 'top 88%', end: 'center 60%', scrub: .6 } });
     // Safety net: never leave the portrait half revealed.
-    var safe = setTimeout(function () { if (p.state.reveal < 1) G.to(p.state, { reveal: 1, duration: .6 }); }, 3500);
+    var safe = setTimeout(function () {
+      if (p.state.reveal < 1 || p.state.halftone > 0) G.to(p.state, { reveal: 1, halftone: 0, duration: .6 });
+    }, 4500);
     cleanups.push(function () {
       clearTimeout(safe);
       G.ticker.remove(tick);
