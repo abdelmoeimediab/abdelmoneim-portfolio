@@ -113,10 +113,7 @@
     return '' +
       '<div class="home" id="home">' +
         '<section class="hero" id="hero">' +
-          '<div class="hero__meta"><div class="hero__meta-in" data-rise>' +
-            '<span class="hero__socials">' + socials + '</span>' +
-            '<span class="hero__clock"><span>' + esc(t.city) + '</span> <bdi dir="ltr" id="cairoClock">--:--:--</bdi></span>' +
-          '</div></div>' +
+          '<h1 class="hero__name" id="heroName" aria-label="' + esc(p.heroName) + '">' + nameWords + '</h1>' +
           '<div class="hero__copy">' +
             '<p class="hero__tagline" data-lines>' + esc(p.tagline) + '</p>' +
             '<p class="hero__title" data-rise>' + esc(p.title) + '</p>' +
@@ -124,12 +121,15 @@
               '<a class="btn btn--ink" href="#/work" data-magnetic><span class="btn__glyph" aria-hidden="true"></span>' + esc(t.seeWork) + '</a>' +
               '<a class="u link-quiet" href="#/contact">' + esc(t.available) + '</a>' +
             '</div>' +
+            '<div class="hero__meta" data-rise>' +
+              '<span class="hero__socials">' + socials + '</span>' +
+              '<span class="hero__clock"><span>' + esc(t.city) + '</span> <bdi dir="ltr" id="cairoClock">--:--:--</bdi></span>' +
+            '</div>' +
           '</div>' +
           '<div class="hero__figure" id="heroSlot">' +
             '<div id="afterEffectsHeroVideoSlot" hidden></div>' +
             '<div class="hero__img" id="heroImg">' + portrait + '</div>' +
           '</div>' +
-          '<h1 class="hero__name" id="heroName" aria-label="' + esc(p.heroName) + '">' + nameWords + '</h1>' +
         '</section>' +
         '<section class="about" id="about" aria-labelledby="aboutTitle">' +
           '<div class="about__grid">' +
@@ -386,13 +386,16 @@
 
   /* ---------- home: motion ---------- */
   function homeMotion(tl) {
-    var morphInner = setupMorph();
-    var fig = morphInner || $('#heroImg');
-    tl.from(fig, { yPercent: 14, autoAlpha: 0, duration: 1.8, ease: 'expo.out' }, 0);
+    var glp = setupGL();
+    var hero = $('#hero');
+
+    // Entrance: the portrait emerges bottom-up behind an organic edge (WebGL), or rises in (fallback).
+    if (glp) tl.to(glp.state, { reveal: 1, duration: 2.2, ease: 'power2.out' }, .1);
+    else tl.from('#heroImg', { yPercent: 14, autoAlpha: 0, duration: 1.8, ease: 'expo.out' }, 0);
 
     // Leaving the hero: the name drifts up, the copy lifts away.
-    G.to('#heroName', { yPercent: -70, ease: 'none', scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true } });
-    G.to('.hero__copy, .hero__meta', { y: -100, opacity: 0, ease: 'none', scrollTrigger: { trigger: '#hero', start: 'top top', end: '55% top', scrub: true } });
+    G.to('#heroName', { yPercent: -60, ease: 'none', scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true } });
+    G.to('.hero__copy', { y: -80, opacity: 0, ease: 'none', scrollTrigger: { trigger: '#hero', start: 'top top', end: '50% top', scrub: true } });
 
     // About: paragraphs and numbers arrive as they enter.
     $$('[data-reveal]', view).forEach(function (el) {
@@ -409,14 +412,15 @@
     }
     G.from('.clients', { yPercent: 30, autoAlpha: 0, duration: 1.1, ease: 'expo.out', clearProps: 'all', scrollTrigger: { trigger: '.clients', start: 'top 94%', once: true } });
 
-    // Cursor: the portrait and the name move in opposite directions for depth.
-    var hero = $('#hero');
+    // Cursor depth: the portrait and the name drift in opposite directions.
     if (fine && hero) {
-      var fx = G.quickTo(fig, 'x', { duration: 1, ease: 'power3.out' }), fy = G.quickTo(fig, 'y', { duration: 1, ease: 'power3.out' });
-      var nx = G.quickTo('#heroName', 'x', { duration: 1.2, ease: 'power3.out' });
+      var target = glp ? glp.state : $('#heroImg');
+      var kx = glp ? 'offsetX' : 'x', ky = glp ? 'offsetY' : 'y';
+      var fx = G.quickTo(target, kx, { duration: 1.1, ease: 'power3.out' }), fy = G.quickTo(target, ky, { duration: 1.1, ease: 'power3.out' });
+      var nx = G.quickTo('#heroName', 'x', { duration: 1.3, ease: 'power3.out' });
       var move = function (e) {
         var dx = e.clientX / window.innerWidth - .5, dy = e.clientY / window.innerHeight - .5;
-        fx(dx * 30); fy(dy * 16); nx(dx * -22);
+        fx(dx * 26); fy(dy * 14); nx(dx * -24);
       };
       var leave = function () { fx(0); fy(0); nx(0); };
       hero.addEventListener('pointermove', move);
@@ -424,46 +428,40 @@
     }
   }
 
-  /* Slice-glide morph: on desktop the portrait is redrawn as five vertical slices that travel from the hero
-     into the About frame as you scroll, drifting apart mid-way and closing up on arrival. */
-  function setupMorph() {
-    if (!window.matchMedia('(min-width: 901px)').matches) return null;
-    var home = $('#home'), heroImg = $('#heroImg'), slot = $('#aboutSlot'), plate = $('#aboutPlate');
-    if (!home || !heroImg || !slot || !plate) return null;
-    var N = 5, html = '<div class="morph__inner">';
-    for (var i = 0; i < N; i++) {
-      var l = i * 100 / N, r = 100 - (i + 1) * 100 / N;
-      html += '<div class="morph__slice" style="clip-path:inset(0 calc(' + r + '% - 1px) 0 ' + l + '%)"></div>';
-    }
-    var m = document.createElement('div');
-    m.className = 'morph';
-    m.setAttribute('aria-hidden', 'true');
-    m.innerHTML = html + '</div>';
-    home.appendChild(m);
-    var slices = $$('.morph__slice', m);
-    var rel = function (el) {
-      var r = el.getBoundingClientRect(), h = home.getBoundingClientRect();
-      return { left: r.left - h.left, top: r.top - h.top, width: r.width, height: r.height };
-    };
-    var get = function (el, k) { return function () { return rel(el)[k]; }; };
-    var props = function (el) { return { left: get(el, 'left'), top: get(el, 'top'), width: get(el, 'width'), height: get(el, 'height') }; };
-    var offs = [-9, 6, -15, 8, -5];
-    var a = props(heroImg), b = props(slot);
-    b.ease = 'power2.inOut'; b.duration = 1;
-    G.set(m, { left: a.left(), top: a.top(), width: a.width(), height: a.height() });
-    root.classList.add('is-morphing');
-    var tl = G.timeline({ scrollTrigger: { trigger: '#hero', start: 'top top', endTrigger: plate, end: 'center 58%', scrub: .8, invalidateOnRefresh: true } });
-    tl.fromTo(m, a, b, 0)
-      .to(slices, { yPercent: function (i) { return offs[i]; }, ease: 'sine.inOut', duration: .5, stagger: .03 }, .05)
-      .to(slices, { yPercent: 0, ease: 'sine.inOut', duration: .42 }, .58)
-      .fromTo(plate, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ease: 'power2.out', duration: .45 }, .5);
+  /* The portrait is drawn by PortraitGL on a fixed canvas: it ripples under the pointer or a finger, and as you
+     scroll it travels from the hero into the About frame, turning fluid and bowing with scroll speed on the way. */
+  function setupGL() {
+    if (!window.PortraitGL) return null;
+    var heroImg = $('#heroImg'), slot = $('#aboutSlot'), plate = $('#aboutPlate');
+    if (!heroImg || !slot || !plate) return null;
+    var p = window.PortraitGL.create({ src: 'assets/portrait/portrait.webp', from: heroImg, to: slot });
+    if (!p) return null;
+    document.body.appendChild(p.canvas);
+    var tick = function () { p.state.velocity *= .9; p.render(); };
+    var failed = false;
+    p.onReady = function () { if (!failed) { root.classList.add('is-gl'); G.ticker.add(tick); } };
+    p.onError = function () { failed = true; root.classList.remove('is-gl'); };
+    var st = ST.create({
+      trigger: '#hero', start: 'top top', endTrigger: plate, end: 'center 58%',
+      onUpdate: function (self) {
+        G.to(p.state, { progress: self.progress, duration: .8, ease: 'power3.out', overwrite: 'auto' });
+        p.state.velocity = self.getVelocity();
+      }
+    });
+    var plateTween = G.fromTo(plate, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ease: 'power2.out',
+      scrollTrigger: { trigger: plate, start: 'top 88%', end: 'center 60%', scrub: .6 } });
+    // Safety net: never leave the portrait half revealed.
+    var safe = setTimeout(function () { if (p.state.reveal < 1) G.to(p.state, { reveal: 1, duration: .6 }); }, 3500);
     cleanups.push(function () {
-      tl.kill();
-      if (m.parentNode) m.parentNode.removeChild(m);
-      root.classList.remove('is-morphing');
+      clearTimeout(safe);
+      G.ticker.remove(tick);
+      st.kill();
+      plateTween.kill();
+      p.destroy();
+      root.classList.remove('is-gl');
       G.set(plate, { clearProps: 'clipPath' });
     });
-    return $('.morph__inner', m);
+    return p;
   }
 
   function linesMotion(tl) {
@@ -514,7 +512,7 @@
   function safety() {
     var t = setTimeout(function () {
       // #heroImg is hidden on purpose while the morph stands in for it.
-      var figSel = root.classList.contains('is-morphing') ? '.morph__inner' : '#heroImg';
+      var figSel = root.classList.contains('is-gl') ? '.hero__copy' : '#heroImg';
       $$('[data-rise], [data-split], [data-lines], ' + figSel + ', .job > *, .edu, .cat__head > *', view.parentNode).forEach(function (el) {
         var cs = getComputedStyle(el);
         if (cs.visibility === 'hidden' || +cs.opacity < .05) { el.style.opacity = 1; el.style.visibility = 'visible'; el.style.transform = 'none'; }
