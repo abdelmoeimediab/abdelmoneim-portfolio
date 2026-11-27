@@ -5,22 +5,23 @@ Read this first, then `docs/design-brief.md` (the owner's full design brief) and
 ## Who and what
 - Owner: Abdelmoneim Ashraf Diab, graphic designer / motion designer. He writes Arabic (Egyptian dialect) and English; reply in the language he uses.
 - Goal: rebuild the portfolio from scratch (Phase 1: static front-end only; Phase 2: admin/CMS later).
-- Current state: one `index.html` (old design, with an admin dashboard) deployed on Vercel. The redesign replaces it.
+- Current state (2026-11-27): the old design and its admin dashboard were removed. The Phase 1 redesign (direction "the frame": stone background, teal `#00AA83` accent, a frame that morphs 9:16 → 4:5 → 16:9) lives in `index.html` + `assets/`. Content is in `assets/js/content.js`. It is a trial the owner will iterate on; numbers (12 clients, 4+ years) and logos are placeholders.
 
 ## Infrastructure (verified 2026-11-22)
 - GitHub: `abdelmoeimediab/abdelmoneim-portfolio`, default branch `main`. Pushes to any branch get a Vercel preview; `main` is production.
 - Vercel: project `abdelmoneim-portfolio` (`prj_BWpXtKe1fT3wp5YvgHQrKMFfFNP9`), team `team_KtFZhTm3dQ59hFyMXxhMPGqn`, Hobby plan, no custom domain. Preview deployments are behind Vercel SSO protection.
 - Vercel env vars (all environments): `SUPABASE_URL`, `SUPABASE_ANON_KEY` (both public values).
-- Build: `vercel.json` runs `node build.js`, which copies `index.html` to `dist/` and injects the two env vars into the `DEFAULT_SUPABASE_URL` / `DEFAULT_SUPABASE_KEY` constants. If the redesign moves to another file layout or a framework, update `build.js` and `vercel.json` together.
-- Supabase: project ref `wcbluejcttbocervgwot` (eu-west-1). Schema in `supabase-schema.sql`: tables `portfolio_partners`, `portfolio_projects`, `portfolio_settings`, `portfolio_admins`. RLS: public read; writes only for users listed in `portfolio_admins` (checked by `is_portfolio_admin()`). One admin user exists. The data tables were wiped on 2026-11-22 at the owner's request and are empty until the admin signs in (the old page re-seeds from defaults).
-- Still to do by the owner in the Supabase dashboard: turn off public sign-ups.
+- Build: `vercel.json` runs `node build.js`, which copies `index.html` and `assets/` to `dist/`, cache-busts local CSS/JS, and writes the two env vars to `dist/assets/js/supabase-config.js` (ready for Phase 2, not loaded by the page). If the file layout changes or a framework is added, update `build.js` and `vercel.json` together.
+- Supabase: project ref `wcbluejcttbocervgwot` (eu-west-1). Schema in `supabase-schema.sql`: tables `portfolio_partners`, `portfolio_projects`, `portfolio_settings`, `portfolio_admins`. RLS: public read; writes only for users listed in `portfolio_admins` (checked by `is_portfolio_admin()`). One admin user exists. On 2026-11-22 the admin signed in through the old page, which seeded 23 projects, 6 partners and 2 settings rows (this proved admin write works). The new front-end does not read these tables.
+- Public sign-ups are already disabled (verified 2026-11-27). Optional: enable leaked-password protection.
+- Videos: posters are first-frame stills saved locally by `node tools/fetch-posters.js` (Drive thumbnails rate-limit with HTTP 429 when many load at once); playback uses Drive's `/preview` embed.
 
 ## First task in every new setup: audit the Vercel <-> Supabase link
 Do this before designing anything. Report results; do not change anything destructive.
-1. Vercel: project settings, env vars present for production/preview/development, latest production deployment READY, build log shows the env injection message.
+1. Vercel: project settings, env vars present for production/preview/development, latest production deployment READY, build log shows "Wrote Supabase config from environment variables".
 2. Supabase: tables exist with RLS on, policies match `supabase-schema.sql`, run the security advisor, confirm `portfolio_admins` has a row.
-3. End to end: open the production URL, confirm no console errors and that the page reads from Supabase (anon read works, anon write is refused).
-4. Check the repo matches: `index.html` constants vs env vars, no secrets committed, `.gitignore` covers `dist/`.
+3. End to end: open the production URL and confirm no console errors; with the anon key, confirm REST read works and anon write is refused (the Phase 1 page itself does not call Supabase).
+4. Check the repo: no secrets committed (only the anon key may appear, and only in build output), `.gitignore` covers `dist/`.
 5. Report any drift, then wait for the owner before continuing.
 
 ## Rules for working here
