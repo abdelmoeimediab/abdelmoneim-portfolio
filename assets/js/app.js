@@ -92,50 +92,62 @@
     if (lenis) lenis.scrollTo(0, { immediate: true, force: true });
     header.classList.remove('is-hidden');
     setNav();
+    setHeaderTone(0);
     bindView();
   }
 
   /* ---------- views ---------- */
   function homeView() {
-    var p = S.person[lang], t = ui();
+    var p = S.person[lang], t = ui(), c = S.contact;
     var stats = S.stats.map(function (s) {
       return '<div class="stat"><span class="stat__num"><bdi dir="ltr" data-count="' + s.value + '" data-suffix="' + esc(s.suffix) + '">' + s.value + esc(s.suffix) + '</bdi></span><span class="stat__label">' + esc(s[lang]) + '</span></div>';
     }).join('');
-    var logos = S.clients.map(function (c) {
-      var label = clientName(c);
-      var inner = c.logo ? '<img src="' + esc(c.logo) + '" alt="' + esc(lang === 'ar' && c.ar ? c.ar : c.name) + '">' : label;
-      return '<li class="logo-slot" data-client="' + esc(c.id) + '">' + inner + '</li>';
+    var logos = S.clients.map(function (cl) {
+      var label = clientName(cl);
+      var inner = cl.logo ? '<img src="' + esc(cl.logo) + '" alt="' + esc(lang === 'ar' && cl.ar ? cl.ar : cl.name) + '">' : label;
+      return '<li class="logo-slot" data-client="' + esc(cl.id) + '">' + inner + '</li>';
     }).join('');
+    var nameWords = p.heroName.split(' ').map(function (w) { return '<span class="hero__word"><span data-split>' + esc(w) + '</span></span>'; }).join(' ');
+    var socials = c.socials.slice(0, 2).map(function (s) { return '<a class="u" href="' + esc(s.url) + '" target="_blank" rel="noopener">' + brand(s.name) + '</a>'; }).join(lang === 'ar' ? '، ' : ', ');
+    var portrait = '<img src="assets/portrait/portrait.webp" srcset="assets/portrait/portrait-640.webp 640w, assets/portrait/portrait.webp 925w" sizes="(max-width: 900px) 90vw, 46vw" width="925" height="1351" alt="' + esc(p.portraitAlt) + '" decoding="async">';
     return '' +
-      '<section class="home">' +
-        '<div class="hero">' +
-            '<h1 class="hero__name">' +
-              '<span class="line-mask"><span data-split>' + esc(p.name[0]) + '</span></span>' +
-              '<span class="line-mask"><span data-split>' + esc(p.name[1]) + '</span></span>' +
-            '</h1>' +
-            '<div class="hero__copy">' +
-              '<p class="hero__role" data-rise>' + esc(p.role) + '</p>' +
-              '<p class="hero__bio" data-rise>' + esc(p.bio) + '</p>' +
-              '<div class="hero__actions" data-rise>' +
-                '<a class="btn" href="#/work" data-magnetic><span class="btn__glyph" aria-hidden="true"></span>' + esc(t.seeWork) + '</a>' +
-                '<a class="u link-quiet" href="#/contact">' + esc(t.getInTouch) + '</a>' +
-              '</div>' +
+      '<div class="home" id="home">' +
+        '<section class="hero" id="hero">' +
+          '<div class="hero__meta"><div class="hero__meta-in" data-rise>' +
+            '<span class="hero__socials">' + socials + '</span>' +
+            '<span class="hero__clock"><span>' + esc(t.city) + '</span> <bdi dir="ltr" id="cairoClock">--:--:--</bdi></span>' +
+          '</div></div>' +
+          '<div class="hero__copy">' +
+            '<p class="hero__tagline" data-lines>' + esc(p.tagline) + '</p>' +
+            '<p class="hero__title" data-rise>' + esc(p.title) + '</p>' +
+            '<div class="hero__actions" data-rise>' +
+              '<a class="btn btn--ink" href="#/work" data-magnetic><span class="btn__glyph" aria-hidden="true"></span>' + esc(t.seeWork) + '</a>' +
+              '<a class="u link-quiet" href="#/contact">' + esc(t.available) + '</a>' +
             '</div>' +
-          '<div class="hero__side">' +
-            '<div class="ratio-stage" aria-hidden="true">' +
-              '<div class="ratio-frame" id="heroFrame">' +
-                '<div id="afterEffectsHeroVideoSlot" hidden></div>' +
-                '<span class="ratio-frame__label" id="heroRatio">' + ratioHtml('9:16') + ' ' + esc(t.ratios['9:16']) + '</span>' +
-              '</div>' +
-            '</div>' +
-            '<div class="stats">' + stats + '</div>' +
           '</div>' +
-        '</div>' +
-        '<section class="clients" aria-label="' + esc(t.clientsLabel) + '">' +
-          '<p class="clients__label">' + esc(t.clientsLabel) + '</p>' +
-          '<div class="marquee"><ul class="marquee__track">' + logos + '</ul><ul class="marquee__track" aria-hidden="true">' + logos + '</ul></div>' +
+          '<div class="hero__figure" id="heroSlot">' +
+            '<div id="afterEffectsHeroVideoSlot" hidden></div>' +
+            '<div class="hero__img" id="heroImg">' + portrait + '</div>' +
+          '</div>' +
+          '<h1 class="hero__name" id="heroName" aria-label="' + esc(p.heroName) + '">' + nameWords + '</h1>' +
         '</section>' +
-      '</section>';
+        '<section class="about" id="about" aria-labelledby="aboutTitle">' +
+          '<div class="about__grid">' +
+            '<div class="about__media">' +
+              '<div class="about__plate" id="aboutPlate"><div class="about__img" id="aboutSlot">' + portrait.replace('alt="' + esc(p.portraitAlt) + '"', 'alt="" loading="lazy"') + '</div></div>' +
+            '</div>' +
+            '<div class="about__body">' +
+              '<h2 class="about__title" id="aboutTitle" data-reveal>' + esc(t.aboutTitle) + '</h2>' +
+              '<div class="about__copy">' + p.about.map(function (x) { return '<p data-reveal>' + x + '</p>'; }).join('') + '</div>' +
+              '<div class="stats" data-reveal>' + stats + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="clients" aria-label="' + esc(t.clientsLabel) + '">' +
+            '<p class="clients__label">' + esc(t.clientsLabel) + '</p>' +
+            '<div class="marquee"><ul class="marquee__track">' + logos + '</ul><ul class="marquee__track" aria-hidden="true">' + logos + '</ul></div>' +
+          '</div>' +
+        '</section>' +
+      '</div>';
   }
 
   function workView() {
@@ -285,6 +297,7 @@
       });
     });
     if (current.name === 'work') updateWork(false);
+    if (current.name === 'home') bindHome();
     bindMagnetic(view);
     bindCursorTargets(view);
   }
@@ -332,31 +345,137 @@
 
     if (r.name === 'home') homeMotion(tl);
     if (r.name === 'experience') experienceMotion();
-    if (r.name === 'contact') contactMotion(tl);
+    linesMotion(tl);
     cleanups.push(function () { tl.kill(); });
     safety();
   }
 
-  function homeMotion(tl) {
-    // Stats count up
-    $$('[data-count]', view).forEach(function (el) {
-      var o = { v: 0 }, end = +el.getAttribute('data-count'), suf = el.getAttribute('data-suffix') || '';
-      el.textContent = '0' + suf;
-      tl.to(o, { v: end, duration: 1.6, ease: 'power3.out', onUpdate: function () { el.textContent = Math.round(o.v) + suf; } }, .5);
-    });
-    tl.from('.ratio-stage', { scale: .6, autoAlpha: 0, duration: 1.2 }, .2);
-    tl.from('.clients', { yPercent: 40, autoAlpha: 0, duration: 1.1 }, .6);
+  /* ---------- home: clock, name fit ---------- */
+  function bindHome() {
+    var clock = $('#cairoClock');
+    var tick = function () {
+      try { clock.textContent = new Date().toLocaleTimeString('en-GB', { timeZone: 'Africa/Cairo', hour12: false }); } catch (e) { clock.textContent = ''; }
+    };
+    tick();
+    var iv = setInterval(tick, 1000);
+    var onResize = function () { fitName(); };
+    window.addEventListener('resize', onResize);
+    cleanups.push(function () { clearInterval(iv); window.removeEventListener('resize', onResize); });
+    fitName();
+    if (document.fonts) document.fonts.ready.then(fitName);
+  }
 
-    // The frame cycles through the three formats the work is made in.
-    var frame = $('#heroFrame'), label = $('#heroRatio');
-    if (!frame) return;
-    var steps = [['9:16', '56.25%', '100%'], ['4:5', '80%', '100%'], ['16:9', '100%', '56.25%']];
-    var loop = G.timeline({ repeat: -1, delay: 1.6 });
-    steps.concat([steps[0]]).slice(1).forEach(function (s) {
-      loop.to(frame, { width: s[1], height: s[2], duration: 1.1, ease: 'expo.inOut' }, '+=1.4')
-        .add(function () { label.innerHTML = ratioHtml(s[0]) + ' ' + esc(ui().ratios[s[0]]); }, '<.5');
+  // Desktop: the giant name is sized to fill the hero width on one line.
+  function fitName() {
+    var el = $('#heroName');
+    if (!el) return;
+    if (window.innerWidth <= 900) { el.style.removeProperty('--name-size'); return; }
+    el.style.setProperty('--name-size', '100px');
+    var avail = el.clientWidth;
+    el.style.insetInlineEnd = 'auto';            // shrink to the text to measure it
+    var natural = el.offsetWidth;
+    el.style.insetInlineEnd = '';
+    var size = 100 * avail / natural * .995;
+    el.style.setProperty('--name-size', Math.min(size, window.innerHeight * .3) + 'px');
+  }
+
+  function setHeaderTone(y) {
+    var h = current && current.name === 'home' ? $('#hero') : null;
+    header.classList.toggle('on-hero', !!h && y < h.offsetHeight - header.offsetHeight);
+  }
+
+  /* ---------- home: motion ---------- */
+  function homeMotion(tl) {
+    var morphInner = setupMorph();
+    var fig = morphInner || $('#heroImg');
+    tl.from(fig, { yPercent: 14, autoAlpha: 0, duration: 1.8, ease: 'expo.out' }, 0);
+
+    // Leaving the hero: the name drifts up, the copy lifts away.
+    G.to('#heroName', { yPercent: -70, ease: 'none', scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true } });
+    G.to('.hero__copy, .hero__meta', { y: -100, opacity: 0, ease: 'none', scrollTrigger: { trigger: '#hero', start: 'top top', end: '55% top', scrub: true } });
+
+    // About: paragraphs and numbers arrive as they enter.
+    $$('[data-reveal]', view).forEach(function (el) {
+      G.from(el, { y: 44, autoAlpha: 0, duration: 1.1, ease: 'expo.out', clearProps: 'all', scrollTrigger: { trigger: el, start: 'top 88%', once: true } });
     });
-    cleanups.push(function () { loop.kill(); });
+    var nums = $$('[data-count]', view);
+    if (nums.length) {
+      ST.create({ trigger: '.about .stats', start: 'top 90%', once: true, onEnter: function () {
+        nums.forEach(function (el) {
+          var o = { v: 0 }, end = +el.getAttribute('data-count'), suf = el.getAttribute('data-suffix') || '';
+          G.to(o, { v: end, duration: 1.8, ease: 'power3.out', onUpdate: function () { el.textContent = Math.round(o.v) + suf; } });
+        });
+      } });
+    }
+    G.from('.clients', { yPercent: 30, autoAlpha: 0, duration: 1.1, ease: 'expo.out', clearProps: 'all', scrollTrigger: { trigger: '.clients', start: 'top 94%', once: true } });
+
+    // Cursor: the portrait and the name move in opposite directions for depth.
+    var hero = $('#hero');
+    if (fine && hero) {
+      var fx = G.quickTo(fig, 'x', { duration: 1, ease: 'power3.out' }), fy = G.quickTo(fig, 'y', { duration: 1, ease: 'power3.out' });
+      var nx = G.quickTo('#heroName', 'x', { duration: 1.2, ease: 'power3.out' });
+      var move = function (e) {
+        var dx = e.clientX / window.innerWidth - .5, dy = e.clientY / window.innerHeight - .5;
+        fx(dx * 30); fy(dy * 16); nx(dx * -22);
+      };
+      var leave = function () { fx(0); fy(0); nx(0); };
+      hero.addEventListener('pointermove', move);
+      hero.addEventListener('pointerleave', leave);
+    }
+  }
+
+  /* Slice-glide morph: on desktop the portrait is redrawn as five vertical slices that travel from the hero
+     into the About frame as you scroll, drifting apart mid-way and closing up on arrival. */
+  function setupMorph() {
+    if (!window.matchMedia('(min-width: 901px)').matches) return null;
+    var home = $('#home'), heroImg = $('#heroImg'), slot = $('#aboutSlot'), plate = $('#aboutPlate');
+    if (!home || !heroImg || !slot || !plate) return null;
+    var N = 5, html = '<div class="morph__inner">';
+    for (var i = 0; i < N; i++) {
+      var l = i * 100 / N, r = 100 - (i + 1) * 100 / N;
+      html += '<div class="morph__slice" style="clip-path:inset(0 calc(' + r + '% - 1px) 0 ' + l + '%)"></div>';
+    }
+    var m = document.createElement('div');
+    m.className = 'morph';
+    m.setAttribute('aria-hidden', 'true');
+    m.innerHTML = html + '</div>';
+    home.appendChild(m);
+    var slices = $$('.morph__slice', m);
+    var rel = function (el) {
+      var r = el.getBoundingClientRect(), h = home.getBoundingClientRect();
+      return { left: r.left - h.left, top: r.top - h.top, width: r.width, height: r.height };
+    };
+    var get = function (el, k) { return function () { return rel(el)[k]; }; };
+    var props = function (el) { return { left: get(el, 'left'), top: get(el, 'top'), width: get(el, 'width'), height: get(el, 'height') }; };
+    var offs = [-9, 6, -15, 8, -5];
+    var a = props(heroImg), b = props(slot);
+    b.ease = 'power2.inOut'; b.duration = 1;
+    G.set(m, { left: a.left(), top: a.top(), width: a.width(), height: a.height() });
+    root.classList.add('is-morphing');
+    var tl = G.timeline({ scrollTrigger: { trigger: '#hero', start: 'top top', endTrigger: plate, end: 'center 58%', scrub: .8, invalidateOnRefresh: true } });
+    tl.fromTo(m, a, b, 0)
+      .to(slices, { yPercent: function (i) { return offs[i]; }, ease: 'sine.inOut', duration: .5, stagger: .03 }, .05)
+      .to(slices, { yPercent: 0, ease: 'sine.inOut', duration: .42 }, .58)
+      .fromTo(plate, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', ease: 'power2.out', duration: .45 }, .5);
+    cleanups.push(function () {
+      tl.kill();
+      if (m.parentNode) m.parentNode.removeChild(m);
+      root.classList.remove('is-morphing');
+      G.set(plate, { clearProps: 'clipPath' });
+    });
+    return $('.morph__inner', m);
+  }
+
+  function linesMotion(tl) {
+    $$('[data-lines]', view).forEach(function (title, i) {
+      if (lang === 'en' && Split) {
+        var s = new Split(title, { type: 'lines', mask: 'lines' });
+        cleanups.push(function () { s.revert(); });
+        tl.from(s.lines, { yPercent: 110, duration: 1.2, stagger: .1 }, .15 + i * .1);
+      } else {
+        tl.from(title, { y: 40, autoAlpha: 0, duration: 1.2 }, .15 + i * .1);
+      }
+    });
   }
 
   function revealItems(box) {
@@ -391,24 +510,18 @@
     G.from('.edu', { y: 30, autoAlpha: 0, duration: 1, ease: 'expo.out', clearProps: 'all', scrollTrigger: { trigger: '.edu', start: 'top 92%', once: true } });
   }
 
-  function contactMotion(tl) {
-    var title = $('[data-lines]', view);
-    if (!title) return;
-    if (lang === 'en' && Split) {
-      var s = new Split(title, { type: 'lines', mask: 'lines' });
-      cleanups.push(function () { s.revert(); });
-      tl.from(s.lines, { yPercent: 110, duration: 1.2, stagger: .1 }, 0);
-    } else {
-      tl.from(title, { y: 40, autoAlpha: 0, duration: 1.2 }, 0);
-    }
-  }
-
   // Safety net: if anything is still hidden after the entrance should have finished, show it.
   function safety() {
     var t = setTimeout(function () {
-      $$('[data-rise], [data-split], .stat__num, .ratio-stage, .clients, .job > *, .edu, .cat__head > *', view).forEach(function (el) {
+      // #heroImg is hidden on purpose while the morph stands in for it.
+      var figSel = root.classList.contains('is-morphing') ? '.morph__inner' : '#heroImg';
+      $$('[data-rise], [data-split], [data-lines], ' + figSel + ', .job > *, .edu, .cat__head > *', view.parentNode).forEach(function (el) {
         var cs = getComputedStyle(el);
         if (cs.visibility === 'hidden' || +cs.opacity < .05) { el.style.opacity = 1; el.style.visibility = 'visible'; el.style.transform = 'none'; }
+      });
+      $$('[data-reveal], .clients', view).forEach(function (el) {
+        var cs = getComputedStyle(el);
+        if (el.getBoundingClientRect().top < window.innerHeight && (+cs.opacity < .05 || cs.visibility === 'hidden')) { el.style.opacity = 1; el.style.visibility = 'visible'; el.style.transform = 'none'; }
       });
       $$('.item__media[data-pending]', view).forEach(function (m) {
         var top = m.getBoundingClientRect().top;
@@ -507,6 +620,7 @@
 
   var lastY = 0;
   function onScroll(y) {
+    setHeaderTone(y);
     if (y > lastY + 6 && y > 140) header.classList.add('is-hidden');
     else if (y < lastY - 6 || y < 140) header.classList.remove('is-hidden');
     lastY = y;
@@ -566,9 +680,14 @@
       .to(label, { autoAlpha: 0, duration: .3 }, '+=.15')
       .to(frame, { width: window.innerWidth * 1.02, height: window.innerHeight * 1.02, duration: .9 }, '<')
       .add(function () { el.style.background = 'transparent'; next(); })
-      .to(el, { clipPath: 'inset(0% 0% 100% 0%)', duration: .9 }, '+=.05')
+      .to(el, parse().name === 'home' ? { autoAlpha: 0, duration: .5, ease: 'power1.out' } : { clipPath: 'inset(0% 0% 100% 0%)', duration: .9 }, '+=.05')
       .add(function () { el.classList.add('is-done'); try { sessionStorage.setItem('introSeen', '1'); } catch (e) {} });
   }
+
+  // Crossing the desktop breakpoint switches the morph on or off, so the home view is rebuilt.
+  var mqDesk = window.matchMedia('(min-width: 901px)');
+  var onMq = function () { if (current && current.name === 'home' && viewer.hidden) { var r = current; current = null; show(r); enter(r); } };
+  if (mqDesk.addEventListener) mqDesk.addEventListener('change', onMq);
 
   /* ---------- boot ---------- */
   applyChrome();

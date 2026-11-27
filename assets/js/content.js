@@ -6,16 +6,31 @@
 window.SITE = {
   person: {
     en: {
-      name: ['Abdelmoneim', 'Diab'],
-      role: 'Senior Multimedia & Graphic Designer, Head of Graphic Design',
-      bio: 'I design identities, campaigns and motion for brands in real estate, engineering and government. Most of my work ships as social content, print and video, made to be read in a second and remembered after.',
+      name: ['Abdelmoneim', 'Diab'],            // short form, used in the header
+      heroName: 'ABDEL MONEIM ASHRAF',
+      tagline: 'Ideas into visuals. Visuals into impact.',
+      title: 'Multimedia & Visual Designer',
+      portraitAlt: 'Portrait of Abdel Moneim Ashraf',
+      // About copy: owner-approved, use verbatim. Each item is one paragraph (HTML allowed).
+      about: [
+        'I’m a Multimedia & Visual Designer passionate about turning ideas into meaningful visual experiences.',
+        'With experience across corporate and creative agency environments, I work across graphic design, motion graphics, and multimedia production, combining creativity with strategic thinking to create visuals that communicate, connect, and leave an impact.',
+        'My ambition is to grow beyond execution into creative direction, shaping ideas into strong visual identities and experiences.'
+      ],
       lab: 'Visual & Motion Lab',
       education: 'B.A. in Media, Mansoura University'
     },
     ar: {
       name: ['عبد المنعم', 'دياب'],
-      role: 'مصمم جرافيك ومالتي ميديا أول، ورئيس قسم التصميم',
-      bio: 'بصمم هويات بصرية وحملات وموشن لعلامات في العقارات والهندسة والقطاع الحكومي. أغلب شغلي بيتنشر كمحتوى سوشيال ومطبوعات وفيديو، معمول عشان يتقري في ثانية ويفضل في الذاكرة بعدها.',
+      heroName: 'عبد المنعم أشرف',
+      tagline: 'أفكار بتتحول لصورة، وصورة بتسيب أثر.',
+      title: 'مصمم مالتي ميديا وتصميم بصري',
+      portraitAlt: 'صورة عبد المنعم أشرف',
+      about: [
+        'أنا عبد المنعم، <bdi dir="ltr">Graphic Designer</bdi> و<bdi dir="ltr">Multimedia Specialist</bdi>، بحب أحوّل الأفكار لحاجة تتشاف وتتفتكر.',
+        'شغلي بيتنوع بين التصميم، الموشن جرافيك، وصناعة المحتوى البصري. بحب أجرب، أتعلم، وأدور دايمًا على طريقة مختلفة أقدم بيها الفكرة.',
+        'بالنسبالي التصميم مش مجرد شكل حلو، هو فكرة وراها هدف وطريقة توصل بيها للناس. وطموحي إني أكبر في المجال، وأوصل لمرحلة أكون فيها صاحب الرؤية اللي بتبدأ منها الفكرة وبتكمل بيها.'
+      ],
       lab: 'معمل بصري وموشن',
       education: 'بكالوريوس إعلام، جامعة المنصورة'
     }
@@ -128,6 +143,10 @@ window.SITE = {
       seeWork: 'See the work',
       getInTouch: 'Get in touch',
       clientsLabel: 'Selected clients',
+      aboutTitle: 'About me',
+      city: 'Cairo',
+      available: 'Available for new projects',
+      scroll: 'Scroll',
       workTitle: 'Work',
       workIntro: 'Five kinds of work, each shown in the format it was made for.',
       all: 'All',
@@ -160,6 +179,10 @@ window.SITE = {
       seeWork: 'شوف الأعمال',
       getInTouch: 'تواصل معايا',
       clientsLabel: 'عملاء اشتغلت معاهم',
+      aboutTitle: 'عنّي',
+      city: 'القاهرة',
+      available: 'متاح لمشاريع جديدة',
+      scroll: 'انزل',
       workTitle: 'الأعمال',
       workIntro: 'خمس أنواع من الشغل، كل نوع معروض بالمقاس اللي اتعمل له.',
       all: 'الكل',
